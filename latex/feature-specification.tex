@@ -1,0 +1,61 @@
+% vim: set spell:
+
+\chapter{Feature Specification}
+
+% simplify teachers' assistants to just assistants.
+
+% What is a course? It takes time.
+
+\section{User Roles}
+
+(online TA is a bad name, since the service does more than a usual TA would, or
+at least, the online TA has more rights than a physical TA would.)
+
+For an online TA there are two principal user roles: \emph{system
+administrators} and \emph{users}.
+
+System administrators have complete control of the servers running the service,
+including the mechanisms that enforce the security policies of the service.
+(They can, in principle, change anything.) System administrators are also
+responsible for monitoring the service for abnormal or abusive behaviour.
+
+(Ignoring or limiting system administrators would require ignoring or limiting
+anyone with the root access to the machine. This seems rather pointless.)
+
+Users access the system through a secure online interface. They set up, hold,
+enroll to, and participate in \emph{courses} --- a collection of programming
+assignments for the enrollees to solve.
+
+There are three principle course-specific user roles: \emph{instructors},
+\emph{assistants}, and \emph{students}. Instructors and assistants set up
+assignments for the students to solve, as well as keep an eye on student
+progress.
+
+Teachers set up, and hold courses. Students enroll to and follow courses. A
+course is a collection of programming assignments for the enrolled students to
+solve. Some students may be enrolled on a course as teacher's assistants. Their
+task is to help the teachers in holding the course.
+
+In what follows, we will distinguish between 
+
+Users use the web application. Users can set up courses and be enrolled for
+courses. A user that sets up a course, is trivially enrolled for that course.
+
+Users have additional course roles. A user may be a \emph{teacher}, an
+\emph{assistant}, or a \emph{student}. A user that sets up a course is
+automatically enrolled as a teacher on that course. A teacher can enroll any
+other user as either a teacher, an assistant, or a student.
+
+A user cannot change their own course role. Only a supperior
+
+which yields them a
+teacher on that course. They can then enroll other users as either
+\emph{teachers}, \emph{assistants}, or \emph{students}.
+
+When a teacher hires an assistant, the teacher sets up a trust relationship
+with the assistant. The assistant can do anything a teacher can, except kick
+teachers off the course.
+
+In principle we can let students set up their own courses, but this may incur
+additional complexities wrt. monitoring that don't seem to be worth dealing
+with at the moment.
