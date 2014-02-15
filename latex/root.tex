@@ -5,6 +5,13 @@
 \usepackage[fancy]{template}
 \usepackage{survival-pack}
 
+\usepackage{glossaries}
+
+\loadglsentries{glossary}
+\makeglossaries
+
+\makeindex
+
 \setup{%
   subject={Master Project},%
   assignment={Online TA},%
@@ -22,6 +29,10 @@
 \input{feature-specification}
 
 %\input{references}
+
+\appendix
+
+\printglossaries
 
 \end{document}
 

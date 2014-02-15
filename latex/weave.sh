@@ -35,6 +35,12 @@ else
   COMMAND="\\input{$BASENAME}"
 fi
 
+cd output
+
+makeglossaries $JOBNAME
+
+cd ..
+
 pdflatex -output-directory=$OUTDIR -file-line-error \
   -jobname $JOBNAME \
   $COMMAND
