@@ -11,8 +11,13 @@
 % (online TA is a bad name, since the service does more than a usual TA would,
 % or at least, the online TA has more rights than a physical TA would.)
 
-For an online TA there are two principal user roles: \emph{system
-administrators} and \emph{participants}.
+For an online TA there are three principal user roles: \emph{system
+administrators}, \emph{stakeholders} (students, teachers, and the general
+public). (TODO: is the general public really a stakeholder?) 
+
+% is the contents not visible to the rest of the world?
+
+% some students may be reluctant to participate in public fora.
 
 System administrators have complete control of the servers running the service,
 including the mechanisms that enforce the security policies of the service.
@@ -23,24 +28,50 @@ responsible for monitoring the service for abnormal or abusive behaviour.
 % limiting anyone with the root access to the machine. This seems rather
 % pointless.)
 
-Participants access the system through a secure online interface. They set up,
-enroll, and \emph{participate} in courses. A course is a collection of
-programming assignments for the enrollees to solve.
+Stakeholders access the system through a secure online interface. They set up,
+enroll participants, and participate in courses --- where a course is a
+collection of programming assignments for the students to solve.
 
-There are three principle course-specific participant roles:
-\emph{instructors}, \emph{assistants}, and \emph{students}.
+The general public
+
+% enroll students by KU-email.
+
+There are four principle course-specific stakeholder roles: \emph{instructors},
+\emph{assistants}, \emph{students}, and \emph{non-participants}. That is, for
+each course, every stakeholder has exactly one of these four roles.
 
 Instructors are the principle course administrators. They can enroll other
 participants as either instructors, assistants, or students. Their primary role
-is to define the programming assignments of a course.
+is to define the elements of a course.
 
 Assistants are second-level course administrators. They can enroll other
-participants as assistants and students. Their primary role is to assist the
-instructors in defining the programming assignments of a course.
+participants as either assistants or students. Their primary role is to assist
+the instructors in defining the elements of a course, and to provide feedback
+to students.
 
 Students are the basic users of a course. They cannot enroll other
-participants. Their primary role is to attempt to solve the programming
-assignments posed by the instructors and their assistants.
+participants, or tamper with the elements of a course. Their primary role is to
+submit solutions to the programming assignments of a course. Student
+submissions are individual or group-based, and so not visible to other students
+in general. Student submissions are visible to instructors and assistants for
+the sake of evaluation.
+
+Non-participants can see the elements of a course, but they cannot participate
+in the course in any way. The reasoning here is that there is no implicit trust
+relationship among the participants of a course, that does not exist among all
+the stakeholders of an institution. Providing access to non-participants allows
+them to get a feel for the course, which is useful for both encouraging
+participation and course evaluation.
+
+\begin{itemize}
+
+\item Only instructors and assistants can define the elements of a course.
+
+\item Only students can make submissions to programming assignments.
+
+\item Course contents is open for everyone in the system to see.
+
+\end{itemize}
 
 % When a teacher hires an assistant, the teacher sets up a trust relationship
 % with the assistant. The assistant can do anything a teacher can, except kick
@@ -49,3 +80,10 @@ assignments posed by the instructors and their assistants.
 % In principle we can let students set up their own courses, but this may incur
 % additional complexities wrt. monitoring that don't seem to be worth dealing
 % with at the moment.
+
+% anybody can view the elements of a course, but only enrolled students can
+% submit solutions to programming assignments.
+
+% what can the instructors and assistants see, what can the students, and the
+% general public see?
+
