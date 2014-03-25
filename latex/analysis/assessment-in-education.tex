@@ -18,7 +18,7 @@ the latter, to improve teaching. In this work we will primarily concern
 ourselves with the former, so assessment for us will be getting to know our
 students and the quality of their learning\cite{ramsden1992}.
 
-\subsection{Formative and Summative Assessment}
+\subsection{Categorising Assessment}
 
 There are two principal of kinds of assessment: formative and summative. The
 definition of each kind varies somewhat in educational research\cite{bloom1971,
@@ -49,9 +49,10 @@ assessments, whereas summative assessment demands the ability to specify
 standards and perform standardised assessments.
 
 There are other forms of assessment, such as diagnostic assessment,
-self-assessment, peer-assessment, etc. These forms of assessment still vary
-along the formative/summative scales, but differ in terms of when, by whom, and
-of whom the assessment is made.
+self-assessment, peer-assessment, etc \cite{bull-mckenna-2004,topping-1998}.
+These forms of assessment are still categorised in terms of the formative and
+summative dichotomy, but differ in terms of when, by whom, and of whom the
+assessment is made.
 
 \subsection{Feedback}
 
@@ -73,42 +74,33 @@ approach is to use computer-assisted assessment.
 
 Computer-assisted assessment is the form of assessment performed with the
 assistance of computers\cite{conole-warburton-2005}. The benefit of using
-computers is often fast, consistent, unbiased assessment, provided that the
-perceived student performance can be encoded in some useful digital format.
+computers is ideally, fast, highly-available, consistent, and unbiased
+assessment\cite{ala-mutka-2005}, provided that the perceived student
+performance can be encoded in some useful digital format.
 
 This requirement however, has proven evasive. Anything that is in free-speech
-or free-text form, is still not very useful\cite{valenti-et-al-2003}. On the
-other hand, it is questionable in-how-far the obviously useful forms, such as,
+or free-text form, is still hard to assess\cite{valenti-et-al-2003}. On the
+other hand, it is questionable in-how-far the easily assessable forms, such as,
 multiple-choice questionnaires, are appropriate for assessment in higher
 education\cite{conole-warburton-2005}.
 
-Let a submission be a digital encoding of perceived student performance. Being
-digital, a submission is always done in some particular data format. A data
-format is an organisation of the data such that there exists an effective
-procedure that can recognise the encoded data, preferably in a finite number of
-steps.
+\subsection{Submission}
 
-The recognition of the encoded data constitutes the construction of a
-representation of the structure of the data. Such a representation will signify
-blobs within the data and their mutual relationships. The blobs of data may
-themselves be encoded using some other data format.
+Let a submission be a record of perceived student performance. Let a digital
+submission be a digital encoding of such a record. Digital submissions are
+amenable to assessment with the assistance of computers.
 
-We say that the structuredness of data is inverse proportional to the maximum
-size of the largest blob of data allowed by its data format. For instance, a
-text file is not very well-structured since it is composed of a series of blobs
-roughly 4096 bytes each. An array of 64-bit integers, on the other hand, is
-fairly well-structured, having a maximum blob size of 8 bytes.
+We say that digitally encoded data is well-structured for a particular purpose,
+if we can devise effective procedures for accessing the data for that
+particular purpose.
 
-We hypothesize, that computers are best-suited for dealing with highly
-structured data.
+For instance, a tableau of integers is well-structured for assessing a
+multiple-choice questionnaire, allowing us to cross-check it against a
+reference tableau. A sequence of bytes however, is not well-structured for
+assessing free-form text in general\cite{valenti-et-al-2003}. 
 
-Research into computer-assisted assessment provides some ground for this
-hypothesis. Multiple-choice questionaires are easy to assess: they can be
-encoded as a tableau of low-range integers. Free-text submissions are hard to
-assess: they can seldom be encoded as anything better than one large blob of
-data. The general approach in research in this area, seems to be to attempt to
-impose some structure on the otherwise plain data blob which is the
-submission\cite{valenti-et-al-2003}.
+The general research problem of computer-assisted assessment is to deduce
+structural features interesting to assessment from digital submissions.
 
 % the goal of higher education?
 
