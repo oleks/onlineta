@@ -13,10 +13,10 @@ improve learning processes, combinations of the aforementioned, and so
 on\cite{first-ten-years}.
 
 Assessment in education is primarily of students and their learning, or of
-teachers and their teaching. The former may later be used to improve learning,
-the latter, to improve teaching. In this work we will primarily concern
-ourselves with the former, so assessment for us will be getting to know our
-students and the quality of their learning\cite{ramsden1992}.
+teachers and their teaching. The primary intent of the former is to improve
+learning --- the latter --- to improve teaching. In this work we will primarily
+concern ourselves with the former, so assessment for us will be getting to know
+our students and the quality of their learning\cite{ramsden1992}.
 
 \subsection{Categorising Assessment}
 
@@ -24,7 +24,7 @@ There are two principal of kinds of assessment: formative and summative. The
 definition of each kind varies somewhat in educational research\cite{bloom1971,
 sadler1989, formative-vs-summative}, and their mutual compatibility is
 questionable\cite{butler1988}. The intent of this work is not to advise on the
-matter, but to aid in performing assessments, regardless of the flavours.
+matter, but to aid in performing assessment, regardless of the flavour.
 
 Let us therefore adopt a primitive distinction, which still supports the
 purposes of our further analysis:
@@ -48,11 +48,10 @@ Formative assessment necessitates the ability to perform personalised
 assessments, whereas summative assessment demands the ability to specify
 standards and perform standardised assessments.
 
-There are other forms of assessment, such as diagnostic assessment,
-self-assessment, peer-assessment, etc \cite{bull-mckenna-2004,topping-1998}.
-These forms of assessment are still categorised in terms of the formative and
-summative dichotomy, but differ in terms of when, by whom, and of whom the
-assessment is made.
+There are other forms of assessment: diagnostic assessment, self-assessment,
+peer-assessment, etc \cite{bull-mckenna-2004,topping-1998}.  These forms of
+assessment vary in terms of the formative/summative dimensions, but primarily
+differ in terms of when, by whom, and of whom the assessment is made.
 
 \subsection{Feedback}
 
@@ -75,32 +74,66 @@ approach is to use computer-assisted assessment.
 Computer-assisted assessment is the form of assessment performed with the
 assistance of computers\cite{conole-warburton-2005}. The benefit of using
 computers is ideally, fast, highly-available, consistent, and unbiased
-assessment\cite{ala-mutka-2005}, provided that the perceived student
+assessment\cite{ala-mutka-2005}. The requirement is that the perceived student
 performance can be encoded in some useful digital format.
 
-This requirement however, has proven evasive. Anything that is in free-speech
-or free-text form, is still hard to assess\cite{valenti-et-al-2003}. On the
-other hand, it is questionable in-how-far the easily assessable forms, such as,
-multiple-choice questionnaires, are appropriate for assessment in higher
+This requirement however, has proven evasive. Free form performances, such as
+essays or oral presentations, are still hard to assess
+automatically\cite{valenti-et-al-2003}.  On the other hand, it is questionable
+in how far easily assessable performances, such as, multiple-choice
+questionnaires, are appropriate for assessment in higher
 education\cite{conole-warburton-2005}.
+
+We hypothesise, without further proof, that in how far computers can assist in
+assessment, depends on how rigorous the student performance can be expected to
+be.  We formalise this notion in the following sections.
+
+\subsection{Assignment}
+
+An assignment is a request for someone to perform a particular job.  An
+assignment in education is a request for a student to make a particular
+performance, and often, to provide a record thereof. One purpose of an
+assignment is to provide basis for an assessment. The request therefore, often
+includes a specification of what the assessment will be based on, and in what
+time frame the assignment should be completed in order to be assessed.
 
 \subsection{Submission}
 
-Let a submission be a record of perceived student performance. Let a digital
-submission be a digital encoding of such a record. Digital submissions are
-amenable to assessment with the assistance of computers.
+A submission is a record of student performance, submitted for the purposes of
+assessment. A digital submission is a digital encoding of such a record.
+Digital submissions are amenable to assessment with the assistance of
+computers, and thus of most interest to us.
 
-We say that digitally encoded data is well-structured for a particular purpose,
-if we can devise effective procedures for accessing the data for that
-particular purpose.
+We say that a structure is \emph{rigorous} if we can devise effective
+procedures to extract the individual elements of the structure, preferably
+within a finite number of steps. In how far computers can assist in assessment
+depends on how rigorously a submission can be expected to be structured.
 
-For instance, a tableau of integers is well-structured for assessing a
-multiple-choice questionnaire, allowing us to cross-check it against a
-reference tableau. A sequence of bytes however, is not well-structured for
-assessing free-form text in general\cite{valenti-et-al-2003}. 
+With the advent of modern computer technology, submissions can also be expected
+to be structured with the assistance of computers. Such use of computers can
+give some rigor to the structure of submissions.
 
-The general research problem of computer-assisted assessment is to deduce
-structural features interesting to assessment from digital submissions.
+For instance, in a multiple-choice test, a computer may present the student
+with the questions and options. The student may then respond to the computer
+using toggles, and have the computer encode the options thereby chosen in a
+tableau of integers. An assessment then constitutes merely comparing against a
+reference tableau --- something computers are notoriously good at.
+
+If instead a student is asked to write an essay, modern computers can assist
+with little more than dictionaries, thesauri, and mark up. From the point of
+view of a computer, an essay is often little more than a stream of words and
+punctuation. Much of the structuring is conducted directly by the student.
+
+An essay can of course be assumed to be written in a natural language. Natural
+languages however, often lack in rigor. Vagueness and ambiguity flourishes in
+natural languages. They are at best, somewhat rigorous. The extent of this
+``somewhat'' is the subject matter of much research in natural language
+processing and automated essay assessment\cite{valenti-et-al-2003}.
+
+Beyond where computers can help, it is the question of how rigorous one can
+expect the students to be. In some disciplines, such as Computer Science, high
+rigor can often be expected in certain types of assignments, such as
+programming assignments. We explore this in the following sections.
 
 % the goal of higher education?
 
