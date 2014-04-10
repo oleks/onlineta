@@ -3,7 +3,7 @@
 USER=$(whoami)
 DIR="measure"
 
-MEMCG="$(mktemp -d -p "/sys/fs/cgroup/memory/onlineta/" \
+MEMCG="$(mktemp -d -p "cgroup/memory/onlineta/" \
   "$USER-exec-XXXXXX")"
 
 for src in "$DIR/memory/"* ; do
@@ -11,12 +11,15 @@ for src in "$DIR/memory/"* ; do
   /bin/echo "$(( $(cat "$src") + 100 ))" > "$dst"
 done
 
-echo 1 > "$MEMCG/memory.use_hierarchy"
-echo 0 > "$MEMCG/memory.swappiness"
+cat "$MEMCG/memory.limit_in_bytes"
+cat "$MEMCG/memory.memsw.limit_in_bytes"
+#echo 1 > "$MEMCG/memory.use_hierarchy"
+#echo 0 > "$MEMCG/memory.swappiness"
 
-/usr/bin/env sh -c "echo \$\$ >> \"$MEMCG/tasks\" && $1"
+./libexec "$MEMCG/tasks" "$1"
 
 cat "$MEMCG/memory.failcnt"
-#cat "$MEMCG/memory.stat"
+cat "$MEMCG/memory.stat"
+cat "$MEMCG/memory.use_hierarchy"
 
 rmdir "$MEMCG"

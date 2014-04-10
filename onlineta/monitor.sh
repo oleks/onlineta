@@ -13,15 +13,15 @@ DIR="measure"
 rm -rf "$DIR"
 mkdir "$DIR"
 
-MEMCG="$(mktemp -d -p "/sys/fs/cgroup/memory/onlineta/" \
-  "$USER-measure-XXXXXX")"
+MEMCG="$(mktemp -d -p "cgroup/memory/onlineta/" \
+  "$USER-monitor-XXXXXX")"
 
-/usr/bin/env sh -c "echo \$\$ >> \"$MEMCG/tasks\" && $1"
+./libexec "$MEMCG/tasks" "$1"
 
 mkdir "$DIR/memory"
 
 cp_if_exists "$MEMCG/memory.max_usage_in_bytes"          "$DIR/memory"
-#cp_if_exists "$MEMCG/memory.memsw.max_usage_in_bytes"    "$DIR/memory"
+cp_if_exists "$MEMCG/memory.memsw.max_usage_in_bytes"    "$DIR/memory"
 #cp_if_exists "$MEMCG/memory.kmem.max_usage_in_bytes"     "$DIR/memory"
 #cp_if_exists "$MEMCG/memory.kmem.tcp.max_usage_in_bytes" "$DIR/memory"
 
@@ -29,6 +29,8 @@ for file in "$DIR/memory"/*; do
   echo $(basename "$file")
   cat "$file"
 done
+
+cat "$MEMCG/memory.stat"
 
 #cat "$MEMCG/memory.stat"
 
