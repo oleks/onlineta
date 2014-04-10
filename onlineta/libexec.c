@@ -20,7 +20,7 @@ int main(int argc, char* argv[])
   {
     return 2;
   }
-  if (fprintf(fd, "%d\n", pid) < 0)
+  if (fprintf(fd, "%d", pid) < 0)
   {
     return 2;
   }
@@ -29,5 +29,8 @@ int main(int argc, char* argv[])
     return 2;
   }
 
-  execve(argv[2], argv + 3, NULL);
+  if (execve(argv[2], argv + 2, NULL) == -1)
+  {
+    return 2;
+  }
 }
