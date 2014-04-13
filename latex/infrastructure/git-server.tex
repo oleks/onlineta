@@ -2,7 +2,7 @@
 
 \section{Git Server}
 
-The purpose of the git server is to serve as a general purpose data store for
+The purpose of the Git server is to serve as a general purpose data store for
 both course content, assignments, and student submissions. It serves as a
 gateway between students and staff, allowing for staff to publish course
 content and assignments, and for students to make submissions.
@@ -23,6 +23,66 @@ We hypothesize that using Git for programming assignments can spur the learning
 of some of the workflow of modern software development. Ideally, students
 collaborate on assignments, while the teaching staff offer code review, as if
 it were a real software development project.
+
+\subsection{Course as a Repository}
+
+A Git server manages Git repositories. We chose to let a course be represented
+by a Git repository.
+
+A Git repository has one or more branches. We choose to let one branch - the
+master branch - be used for the distribution of course content and assignments
+by teaching staff. To make submissions, students create branches in their name
+and push their changes to these branches onto the server.
+
+In such an infrastructure it is important that students are not allowed to push
+to the master branch, or to other student branches. At the same time, teaching
+staff should be allowed to push to both the master (to provide content and
+assignments) and student branches (to provide feedback). Last but not least, we
+would like to let everyone see that course content and assignments, but
+prohibit them in seeing student submissions, or pushing to any of the branches.
+
+Such fine-grained authentication and authorisation can be achieved through
+OpenSSH and Git hooks.
+
+\subsection{OpenSSH}
+
+OpenSSH is a set of open source computer programs, allowing users to use a
+secure encrypted connection over an insecure network to log in and execute
+commands on a remote machine.
+
+One of the authentication methods supported by OpenSSH is public key
+cryptography. This cryptographic scheme requires two separate keys: a private
+key and a public key. The public key is used to encrypt data or verify a
+digital signature, while the private key is used to decrypt data or generate a
+digital signature.
+
+\subsection{Git Hooks}
+
+Git hooks is a Git mechanism for executing custom scripts when important events
+happen. From the point of view of a server the important events include anyone
+reading from or writing to a repository.
+
+\subsection{Gitolite}
+
+Gitolite is an access control layer on top of Git\cite{gitolite-com-2014a}.
+Gitolite leverages the features of OpenSSH and Git hooks, as discussed above,
+to provide fine-grained authentication and
+authorisation\cite{gitolite-com-2014b}.
+
+Gitolite is used in multiple communities with high-stakes projects, such as
+Fedora, KDE, Gentoo, and kernel.org\cite{gitolite-com-2014c}. Among the reasons
+for choosing gitolite, kernel.org lists\cite{kernel-org-2014} ``well maintained
+and supported code base'', ``responsive development'', ``broad and diverse
+install base'', and ``had undergone an external code
+review''\cite{gitolite-google-group-2011}.
+
+There are also other tools out there, such as  Gerrit\footnote{See also
+\url{https://code.google.com/p/gerrit/}.} and Stash\footnote{See also
+\url{https://www.atlassian.com/software/stash}.}. Both of these provide a lot
+more than a simple access control layer.
+
+In conclusion, we chose to use gitolite ahead of both using other tools, and
+implementing our own solution.
 
 \subsection{Installation}
 
