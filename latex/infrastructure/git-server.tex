@@ -4,8 +4,8 @@
 
 The purpose of the Git server is to serve as a general purpose data store for
 both course content, assignments, and student submissions. It serves as a
-gateway between students and staff, allowing for staff to publish course
-content and assignments, and for students to make submissions.
+gateway between students and teaching staff, allowing for teaching staff to
+publish course content and assignments, and for students to make submissions.
 
 \subsection{Why Git?}
 
@@ -16,17 +16,19 @@ has cemented itself in both the open source community, academia and
 industry\cite{gitprojects-2014}.
 
 Version control and code review are some of the Core- Tier1 and Tier2 elements
-in \cite{cs-curricula-2013}, meaning that they are highly suggested topics for
-any undergraduate Computer Science programme.
+in \cite{cs-curricula-2013}. They are highly suggested topics for any
+undergraduate Computer Science programme.
 
 We hypothesize that using Git for programming assignments can spur the learning
 of some of the workflow of modern software development. Ideally, students
-collaborate on assignments, while the teaching staff offer code review, as if
+collaborate on assignments, while teaching staff offer code reviews, all as if
 it were a real software development project.
+
+% pull requests?
 
 \subsection{Course as a Repository}
 
-A Git server manages Git repositories. We chose to let a course be represented
+A Git server manages Git repositories. We choose to let a course be represented
 by a Git repository.
 
 A Git repository has one or more branches. We choose to let one branch - the
@@ -34,27 +36,53 @@ master branch - be used for the distribution of course content and assignments
 by teaching staff. To make submissions, students create branches in their name
 and push their changes to these branches onto the server.
 
+Assessment of a student submission is provided in a special subdirectory on
+their private branch. All assessment is bound to particular commit by the
+student to a student branch.
+
 In such an infrastructure it is important that students are not allowed to push
 to the master branch, or to other student branches. At the same time, teaching
 staff should be allowed to push to both the master (to provide content and
 assignments) and student branches (to provide feedback). Last but not least, we
-would like to let everyone see that course content and assignments, but
-prohibit them in seeing student submissions, or pushing to any of the branches.
+would like to let everyone see course content and assignments, but prohibit
+them in seeing student submissions, or pushing to any of the branches.
 
 Such fine-grained authentication and authorisation can be achieved through
 OpenSSH and Git hooks.
 
 \subsection{OpenSSH}
 
-OpenSSH is a set of open source computer programs, allowing users to use a
-secure encrypted connection over an insecure network to log in and execute
-commands on a remote machine.
+OpenSSH is a free (as in free speech) version of the SSH connectivity
+tools\cite{openssh-com-2014}.  The tools provide for secure encrypted
+communication between untrusted hosts over an insecure network\cite{man-1-ssh}.
+They include tools for user authentication, remote command execution, file
+management, etc.
 
-One of the authentication methods supported by OpenSSH is public key
-cryptography. This cryptographic scheme requires two separate keys: a private
-key and a public key. The public key is used to encrypt data or verify a
-digital signature, while the private key is used to decrypt data or generate a
-digital signature.
+An OpenSSH host maintains a private/public key pair used to identify the host.
+Upon connection, the host offers its public key to the client, in hope that the
+client will accept it and (securely) proceed with authentication with the host.
+If authenticated, the client is mapped to a particular user on the host.  After
+some session preparation, the client, as that user, can start a session, i.e.
+request a shell or the execution of a command.
+
+One of the authentication methods supported by OpenSSH is using public key
+cryptography. The idea is that each client creates a private/public key pair,
+and informs the host of the public key over some otherwise secure channel, e.g.
+using a trusted keyserver.
+
+For any user on the host, a file can be created, e.g.
+\texttt{\textasciitilde/.ssh/authorized\_keys}, listing the public keys of
+those private/public key pairs that may be used to authenticate as that user.
+The format of this file\cite{man-8-sshd}, allows to specify additional options
+for each key. The options can be used to e.g. set an environment variable, or
+replace the command executed once the user is authenticated. The original
+command is then saved as the environment variable
+\texttt{SSH\_ORIGINAL\_COMMAND}.
+
+When using a Git server with OpenSSH, Git operations on the client, will
+attempt execute Git operations on the host. Per-key options can be used to make
+their execution dependent on the key used for authentication, e.g. performing
+authorisation.
 
 \subsection{Git Hooks}
 
@@ -83,6 +111,80 @@ more than a simple access control layer.
 
 In conclusion, we chose to use gitolite ahead of both using other tools, and
 implementing our own solution.
+
+\subsection{Attack surface}
+
+\subsubsection{Shell}
+
+It is often important with Git servers to disallow client shell requests.  This
+is typically achieved by setting the user's login shell to something
+non-permissive, e.g. a \texttt{git-shell}\cite{man-1-git-shell}. To our
+knowledge there are no vulnerabilities in \texttt{git-shell}.
+
+\subsubsection{Forced push and rewriting history}
+
+Git has a, somewhat controversial\cite{torvalds-2007,hamano-2009,rego-2013},
+forced push feature. This bypasses the check that the remote ref being updated
+should be an ancestor of the local ref used to overwrite
+it\cite{man-1-git-push}. Meaning that the branch being updated should be the
+strict base of the update.
+
+Forced push is dangerous because it incautiously overwrites history and can
+thereby inhibit assessment or even modify student records.
+
+This is mitigated for by Gitolite permissions. Students are simply not allowed
+to perform a forced push\footnote{As an experimental bug, teaching staff are
+still allowed to perform a forced push.}. This means that students cannot e.g.
+ammend to a commit that they have already pushed to the server. The students
+should be encouraged to use \cite{man-1-git-revert} instead.
+
+\subsection{Discussion}
+
+\subsubsection{Pull requests}
+
+Our model of a student submission being a Git push to a student branch is not
+an accurate model of modern software development. In modern software
+development, a developer may work on their own branch (as our students would),
+and then make a ``pull request'' to merge their changes into the master branch.
+(Alternatively, a developer might work on in their own repository, and then
+make a pull request for their changes to be merged into the main project
+repository\cite{bird-et-al-2009}.)
+
+Such pull requests make little sense in education where all students are
+working on the same problem --- a scenario you'd often go to great lengths to
+avoid in industry. Instead, students are always allowed to submit what they
+have to their own branch. Code reviews are then done of the content in the
+student branch each time they push to their branch on the Git server (by a
+computer), or at nominal points in time (by a human).
+
+Alternatively, we could have chosen to have students make a pull request to a
+special ``submission branch'', with the other branch being a ``draft branch''.
+This would demand a more complicated set up of the Git server, perhaps using
+Gerrit or Stash, as mentioned above. The pull request could then be accepted
+if the code passed automatic code review.
+
+Unfortunately, it is sometimes instructional to give credit for an attempt at
+solving the problem. There may even come a situation where the student has made
+it to submit some basic working code in the submission branch but has a more
+comprehensive (non-working) solution in their draft branch. It would seem that
+this would gravely complicate matters for the subsequent human code review. In
+our model, the commit and test history of a branch is sufficient to reveal when
+the code had last worked.
+
+\subsubsection{Responding to students}
+
+Responding to students via a subdirectory in their private branch means that
+the students have to pull from their branch before they can make a subsequent
+submission (the race condition aside). This is good because it encourages
+students to read feedback and not to push in the blind. This is bad because it
+might inhibit quick (re)submissions (made within minutes): as practice shows,
+this is frequent close to a deadline.
+
+An alternative could be to distribute feedback in a separate private student
+branch, which is not writable by students. This is easy to set up in Gitolite,
+but is more permissive of students pushing in the blind, ignoring all feedback.
+It also adds to the complexity of the student's view of the system. Perhaps
+some students may even fail to realise that feedback is being given at all.
 
 \subsection{Installation}
 
