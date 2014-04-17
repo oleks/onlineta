@@ -24,8 +24,6 @@ of some of the workflow of modern software development. Ideally, students
 collaborate on assignments, while teaching staff offer code reviews, all as if
 it were a real software development project.
 
-% pull requests?
-
 \subsection{Course as a Repository}
 
 A Git server manages Git repositories. We choose to let a course be represented
@@ -74,9 +72,9 @@ For any user on the host, a file can be created, e.g.
 \texttt{\textasciitilde/.ssh/authorized\_keys}, listing the public keys of
 those private/public key pairs that may be used to authenticate as that user.
 The format of this file\cite{man-8-sshd}, allows to specify additional options
-for each key. The options can be used to e.g. set an environment variable, or
-replace the command executed once the user is authenticated. The original
-command is then saved as the environment variable
+for each key. The options can be used to e.g. set a session-specific
+environment variable, or replace the command executed once the user is
+authenticated. The original command is then saved as the environment variable
 \texttt{SSH\_ORIGINAL\_COMMAND}.
 
 When using a Git server with OpenSSH, Git operations on the client, will
@@ -87,8 +85,27 @@ authorisation.
 \subsection{Git Hooks}
 
 Git hooks is a Git mechanism for executing custom scripts when important events
-happen. From the point of view of a server the important events include anyone
-reading from or writing to a repository.
+happen\cite{man-5-githooks}. The scripts can control in how far certain Git
+operations succeed. Git hooks are simply adequately named executables placed in
+a special subdirectory in a local git repository. Git hooks are not part of the
+version-controlled code base.
+
+For instance, the \texttt{update} hook is executed whenever the client attempts
+to push something to a branch. The client has already been authenticated, but
+no changes have been made. The hook is passed adequate arguments to identify
+the branch being updated and the update taking place. If this hook exits with a
+non-zero exit value, the update will duly fail.
+
+\subsection{Users}
+
+When using a Git server with OpenSSH, clients must be mapped to users on the
+host. There are at least two options for the mapping: each client gets their
+own user, or all clients map to the same user. The first option has a higher
+administration costs, but gives perhaps more fine grained access control.
+
+The second option is generally more popular because of less cluttering of the
+UTS namespace. Additional tools, like gitolite, are instead used to provide a
+fine-grained access control layer. We too, have chosen this option.
 
 \subsection{Gitolite}
 
@@ -112,14 +129,61 @@ more than a simple access control layer.
 In conclusion, we chose to use gitolite ahead of both using other tools, and
 implementing our own solution.
 
+\subsubsection{Installation}
+
+Gitolite is installed on a per-user basis. Meaning that we should log in as our
+\texttt{git} user to set up gitolite, or change ownership accordingly after
+install. As an extra security precaution, Gitolite installation does not
+require a privileged user, so long as Git, OpenSSH, and Perl are already
+installed.
+
+The code is distributed under a GNU General Public License, and is available at
+\url{git://github.com/sitaramc/gitolite}. The overly paranoid, may check out
+the latest tag, after verifying that it indeed was signed by Sitaram Chamarty
+(original developer of Gitolite). To the best of our knowledge, his public key
+is:
+
+\begin{verbatim}
+pub   4096R/088237A5 2011-10-25
+      Key fingerprint =
+        560A DA64 7542 816F 412E  5891 A442 9085 0882 37A5
+uid       Sitaram Chamarty (work email) <sitaram@atc.tcs.com>
+uid       Sitaram Chamarty <sitaramc@gmail.com>
+sub   4096R/8AC76EFB 2011-10-25
+\end{verbatim}
+
+\subsubsection{Administration}
+
+\subsubsection{Permissions}
+
 \subsection{Attack surface}
 
-\subsubsection{Shell}
+\subsubsection{Login shell}
 
-It is often important with Git servers to disallow client shell requests.  This
-is typically achieved by setting the user's login shell to something
-non-permissive, e.g. a \texttt{git-shell}\cite{man-1-git-shell}. To our
-knowledge there are no vulnerabilities in \texttt{git-shell}.
+It is often important with Git servers to disallow clients' shell requests.
+This is typically achieved by setting the user's login shell to something
+non-permissive, e.g. a \cite{man-1-git-shell}.
+
+This set up is perhaps a bit superfluous, as gitolite disables interactive
+shell login via the authorized keys file. Never-the-less it is a good extra
+level of security, as the login shell of any user can only be modified by a
+privileged user, which the \texttt{git} user is not.
+
+\subsubsection{Session preparation dialog}
+
+When a client is authenticated with OpenSSH, but before a user session starts,
+the client and the host enter into a session preparation dialog.
+
+The client can request a pseudo-tty (e.g. interactive shell), forwarding X11
+connections (e.g. remote desktop), forwarding TCP connections (e.g. virtual
+private networking), or forwarding the authentication agent connection over the
+secure channel (e.g. using the secure connection to establish other secure
+connections).
+
+All these options open up the attack surface of our Git server. Fortunately,
+all of these session dialog options can be disabled for any key in the
+authorized keys file\cite{man-8-sshd}. By default, gitolite disables all of
+these options for all keys.
 
 \subsubsection{Forced push and rewriting history}
 
@@ -132,11 +196,11 @@ strict base of the update.
 Forced push is dangerous because it incautiously overwrites history and can
 thereby inhibit assessment or even modify student records.
 
-This is mitigated for by Gitolite permissions. Students are simply not allowed
+This is mitigated for by gitolite permissions. Students are simply not allowed
 to perform a forced push\footnote{As an experimental bug, teaching staff are
 still allowed to perform a forced push.}. This means that students cannot e.g.
 ammend to a commit that they have already pushed to the server. The students
-should be encouraged to use \cite{man-1-git-revert} instead.
+are encouraged to use \cite{man-1-git-revert} instead.
 
 \subsection{Discussion}
 
@@ -153,9 +217,9 @@ repository\cite{bird-et-al-2009}.)
 Such pull requests make little sense in education where all students are
 working on the same problem --- a scenario you'd often go to great lengths to
 avoid in industry. Instead, students are always allowed to submit what they
-have to their own branch. Code reviews are then done of the content in the
-student branch each time they push to their branch on the Git server (by a
-computer), or at nominal points in time (by a human).
+have to their own branch. Code reviews are then done of snapshots of the
+student branch, e.g. automatically every time they push, or by a human at a
+nominal point in time.
 
 Alternatively, we could have chosen to have students make a pull request to a
 special ``submission branch'', with the other branch being a ``draft branch''.
@@ -181,10 +245,19 @@ might inhibit quick (re)submissions (made within minutes): as practice shows,
 this is frequent close to a deadline.
 
 An alternative could be to distribute feedback in a separate private student
-branch, which is not writable by students. This is easy to set up in Gitolite,
+branch, which is not writable by students. This is easy to set up in gitolite,
 but is more permissive of students pushing in the blind, ignoring all feedback.
-It also adds to the complexity of the student's view of the system. Perhaps
-some students may even fail to realise that feedback is being given at all.
+It also adds to the complexity of the student's view of the system: some
+students may fail to realise that feedback is being given at all.
+
+As another alternative, feedback could be provided interactively, as part of a
+Git push operation. For instance, in a \texttt{post-receive} or a
+\texttt{post-update} Git hook. These hooks lets us run custom scripts after the
+real work of a Git push is done. The benefit is that the connection to the
+client is not closed until these scripts end, and standard output and error are
+redirected to the client\cite{man-5-githooks}. Although this allows to present
+the test results immediately, it is unclear where the test results should be
+persisted.
 
 \subsection{Installation}
 
