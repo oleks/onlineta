@@ -1,0 +1,32 @@
+% vim: set spell:
+
+\section*{Scope}
+
+The implemented system should be capable of handling an on-site programming
+course at DIKU. This demands a moderate-sized web-based platform, capable of
+handling a couple hundred simultaneous submissions.
+
+As we are dealing with Computer Science teachers and students, a command-line
+interface with the web-application would suffice. The design however, should
+support the latter addition of a graphical user interface, especially for
+students.
+
+The programs submitted by students and the analyses specified by teachers and
+their assistants may, for all intents and purposes, be regarded as arbitrary
+programs that may or may not adhere to some posed requirements. It may however
+be assumed that the teachers and assistants have no incentive to deliberately
+compromise the system. Furthermore, we would like to stay programming language
+agnostic, so we constrain ourselves to the operating system level.
+
+The system should enforce read and write permissions, disallowing students to
+pose or change assignments, submit on other students behalf, view or change the
+private information of teachers, their assistants, or other students, etc.
+
+The system should stay programming language agnostic and allow the use of
+various existing tools for the static and dynamic analyses of student programs,
+e.g.  compilers or linters. The use of tools installed natively on the system
+poses its own security risks.
+
+These are some the basic building blocks of a learning management
+system\cite{lms}.
+

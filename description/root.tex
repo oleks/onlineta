@@ -1,0 +1,72 @@
+% vim: set spell:
+
+\documentclass[a4paper]{article}
+
+\usepackage[a4paper]{geometry}
+
+\usepackage[fancy]{template}
+\usepackage{survival-pack}
+
+\setup{%
+  subject={Master Project},%
+  assignment={Project Description: Online TA},%
+  date={February 4, 2014.}%
+}
+\setupLocation[short=DIKU]{Datalogisk institut, Copenhagen University}
+\setupAuthor[addendum={\email{oleks@diku.dk}}]{Oleksandr Shturmov}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{first} % no fancy header on first page (just a fancy footer).
+
+We would like to specify and implement an online system for automatically
+evaluating submissions to assignments. The prime focus is on programming
+assignments, the submissions to which tend to lend their way to automated
+evaluation.
+
+The system is meant as an aid to the traditional on-site education at the
+Department of Computer Science, University of Copenhagen. The intent of the
+system is to aid teachers and their assistants in some of the evaluations they
+have to make in the course of a programming course. It would be fair to say
+that we would like to design and implement an online teacher's assistant, or
+online TA.
+
+The fact that the producers and the consumers of the learning content will be
+Computer Science teachers and students, allows us to disregard many of the
+problems that would otherwise be worth dealing with, e.g.  graphical user
+interfaces. In contrast, the evaluation of submissions to programming
+assignments opens the system up to challenging problems and threats. The
+automatic evaluation of such submissions typically involves running static or
+dynamic analyses of arbitrary student programs.
+
+We would like to ensure that all evaluations run in isolated environments, and
+all students get a fair share of system resources. Student programs may run for
+too long, use too many resources, fail in unpredictable ways, or even
+deliberately attempt to compromise the system. The analyses themselves,
+specified by the teachers and their assistants, may behave likewise, except the
+lack of incentive to deliberately compromise the system.
+
+It is these problems and threats which are the focus of this project. In the
+following sections we further specify the scope of the project, and present the
+project-specific learning objectives.
+
+\bigbreak
+
+\textbf{Keywords:} online, automatic evaluation, security engineering,
+arbitrary program execution, learning management system.
+
+\input{scope}
+
+%\input{an-online-system}
+
+%\input{arbitrary-program-execution}
+
+%\input{a-basic-learning-management-system}
+
+\input{learning-objectives}
+
+\input{references}
+
+\end{document}
+
