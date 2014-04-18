@@ -7,6 +7,9 @@ both course content, assignments, and student submissions. It serves as a
 gateway between students and teaching staff, allowing for teaching staff to
 publish course content and assignments, and for students to make submissions.
 
+In the following we refer to student and staff collectively simply as clients,
+connecting to our host, the Git server.
+
 \subsection{Why Git?}
 
 Git is a popular\cite{ohloh-2014}, free, and open source distributed version
@@ -23,6 +26,10 @@ We hypothesize that using Git for programming assignments can spur the learning
 of some of the workflow of modern software development. Ideally, students
 collaborate on assignments, while teaching staff offer code reviews, all as if
 it were a real software development project.
+
+Git with authentication over SSH is an easy way to provide a scalable, online
+general purpose data store and gateway, having fine-grained and reliable
+authentication and authorisation procedures.
 
 \subsection{Course as a Repository}
 
@@ -157,7 +164,7 @@ Once cloned and compiled, gitolite setup requires the administrator's public
 SSH key to be provided in some accessible file:
 
 \begin{lstlisting}
-./gitolite setup -pk admin.pub
+$ ./gitolite setup -pk admin.pub
 \end{lstlisting}
 
 This initializes a git repository \texttt{gitolite-admin.git}, which
@@ -330,6 +337,24 @@ redirected to the client\cite{man-5-githooks}. Although this allows to present
 the test results immediately, it is unclear where the test results should be
 persisted.
 
+\subsubsection{SSH Certificate Authority}
+
+\label{section:gitolite-ssh-certificate-authority}
+
+Our choice of gitolite as the access control layer for our Git server,
+seemingly prohibits the use of an SSH certificate authority.
+
+An SSH certificate authority is a separate server that certifies client public
+keys.  This relinquishes a Git server of the need to keep public keys in an
+authorized keys file, and allows to keep a centralized (hiearchical) registry
+of client keys. Gitolite relies on the use of an authorized keys file.
+
+Certificate authorities however, still have to forward client certificates to
+the Git server. If forwarded on-demand, the certificate authority is a single
+point of failure. If forwarded on occasion, certificate authorities are
+functionally equivalent to using a Git repository over SSH, as with gitolite.
+We therefore do not find this to be an inconvenience.
+
 \subsubsection{Scalability}
 
 We dedicate a Git branch to every student. To our knowledge, there is no
@@ -343,13 +368,25 @@ Each time a client performs a Git operation, a connection to the Git server is
 established. The server performs one of a limited set of (presumably, finite)
 operations in a separate user session.
 
-To our knowledge, there are no practical limits the number of simultaneous
-connections to a Linux server, or simultaneous user sessions on a Linux server.
-Again if there are limits, it would be close to underlying file system limits,
-as connections and user sessions are typically file system bound on a Linux
-machine.
+To our knowledge, there are no practical limits on the number of simultaneous
+connections to a Linux server. The number of user sessions however, is bound by
+the maximum number of processes per user. (Later, we will use this feature to
+guard against fork bombs.) This limit can be found using:
+
+\begin{lstlisting}
+$ ulimit -u
+\end{lstlisting}
+
+Although this limit can be lifted, there is a more fundamental limit on the
+total number of processes for a Linux system. This limit is typically 32768. It
+should be increased with caution, and only if there are sufficient system
+resources. The limit can be found using:
+
+\begin{lstlisting}
+$ cat /proc/sys/kernel/pid_max
+\end{lstlisting}
 
 The Git server should safely scale to a course, or a department, provided
 sufficient memory, CPU, and disk resources and speeds. On a university scale,
 it might be advisable to use a Git server per department, as OpenSSH operations
-are fairly CPU expensive.
+are fairly CPU intensive.
