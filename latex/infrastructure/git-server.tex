@@ -253,21 +253,25 @@ are encouraged to use \cite{man-1-git-revert} instead.
 \subsubsection{Git, OpenSSH, and Perl}
 
 Despite it's popularity, relatively few vulnerabilities have ever been found
-outside of the Git development team\cite{cvedetails-com-2014a}. The security of
-Git (out of the box) however, depends on the sensibility of the developers
-involved. Impersonification and private key leaks are not always well guarded
-against\cite{gerwitz-2013}, especially with the advent of modern Git hosting
-services\cite{homakov-2012,huang-2013,homakov-2014}.
+outside of the Git development team\cite{cvedetails-com-2014a}.
 
-Likewise, OpenSSH has had relatively few vulnerabilities discovered outside of
-the OpenSSH development team\cite{cvedetails-com-2014b}. However, the
-underlying OpenSSL has been a lot less fortunate\cite{cvedetails-com-2014c}.
+The security of Git (out of the box) however, depends on the sensibility of the
+developers involved. Impersonification and private key leaks are not always
+well guarded against\cite{gerwitz-2013}, especially with the advent of modern
+Git hosting services\cite{homakov-2012,huang-2013,homakov-2014}. It is the
+purpose of or Git server to serve as a guard against impersonification. Private
+key leaks are to be guarded against by the students themselves. 
 
-Perl has been only a bit less fortunate\cite{cvedetails-com-2014d}.
+OpenSSH has also had relatively few vulnerabilities discovered outside of the
+OpenSSH development team\cite{cvedetails-com-2014b}. However, the underlying
+OpenSSL has been a lot less fortunate\cite{cvedetails-com-2014c}.
 
-All of the above are popular pieces of software on public facing web servers.
-Their security is therefore a matter of grave public concern. The referenced
-material does not cover all of the underlying libraries of this software.
+Perl has only been a bit less fortunate\cite{cvedetails-com-2014d}.
+
+The referenced material does not cover all of the underlying libraries of the
+software. However, all of the above are popular pieces of software on public
+facing web servers.  Their security therefore, is a matter of grave public
+concern.
 
 \subsection{Discussion}
 
