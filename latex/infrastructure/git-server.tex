@@ -86,15 +86,15 @@ authorisation.
 
 Git hooks is a Git mechanism for executing custom scripts when important events
 happen\cite{man-5-githooks}. The scripts can control in how far certain Git
-operations succeed. Git hooks are simply adequately named executables placed in
-a special subdirectory in a local git repository. Git hooks are not part of the
+operations succeed. A Git hook is an adequately named executables placed in a
+special subdirectory in the local Git repository. Git hooks are not part of the
 version-controlled code base.
 
 For instance, the \texttt{update} hook is executed whenever the client attempts
 to push something to a branch. The client has already been authenticated, but
-no changes have been made. The hook is passed adequate arguments to identify
-the branch being updated and the update taking place. If this hook exits with a
-non-zero exit value, the update will duly fail.
+no changes have yet been made. The hook is passed adequate arguments to
+identify the branch or tag being updated and the update taking place. If this
+hook exits with a non-zero exit value, the update will duly fail.
 
 \subsection{Users}
 
@@ -131,30 +131,78 @@ implementing our own solution.
 
 \subsubsection{Installation}
 
-Gitolite is installed on a per-user basis. Meaning that we should log in as our
-\texttt{git} user to set up gitolite, or change ownership accordingly after
-install. As an extra security precaution, Gitolite installation does not
-require a privileged user, so long as Git, OpenSSH, and Perl are already
-installed.
+Gitolite is installed on a per-user basis. Meaning that we should create and
+log in as some designated Git user to set up gitolite, or change ownership
+accordingly after install. As an extra security assurance, the gitolite
+installation does not require a privileged user, so long as Git, OpenSSH, and
+Perl are already installed.
 
 The code is distributed under a GNU General Public License, and is available at
-\url{git://github.com/sitaramc/gitolite}. The overly paranoid, may check out
-the latest tag, after verifying that it indeed was signed by Sitaram Chamarty
-(original developer of Gitolite). To the best of our knowledge, his public key
-is:
+\url{git://github.com/sitaramc/gitolite}. We may wish to check out the latest
+tag (version), after verifying that it indeed was signed by Sitaram Chamarty
+(the original developer of Gitolite)\footnote{See also
+\url{http://git-scm.com/book/en/Git-Basics-Tagging}, if you are unfamiliar with
+Git's tagging mechanism.}. To the best of our knowledge, his public GPG key is:
 
-\begin{verbatim}
+\begin{lstlisting}
 pub   4096R/088237A5 2011-10-25
       Key fingerprint =
         560A DA64 7542 816F 412E  5891 A442 9085 0882 37A5
 uid       Sitaram Chamarty (work email) <sitaram@atc.tcs.com>
 uid       Sitaram Chamarty <sitaramc@gmail.com>
 sub   4096R/8AC76EFB 2011-10-25
-\end{verbatim}
+\end{lstlisting}
+
+Once cloned and compiled, gitolite setup requires the administrator's public
+SSH key to be provided in some accessible file:
+
+\begin{lstlisting}
+./gitolite setup -pk admin.pub
+\end{lstlisting}
+
+This initializes a git repository \texttt{gitolite-admin.git}, which
+\texttt{admin} has complete control over. This repository serves as the primary
+administrative interface for the gitolite access control layer.
+
+\begin{lstlisting}
+
+\end{lstlisting}
 
 \subsubsection{Administration}
 
+Administration of the gitolite happens through a special Git repository. There
+are three important elements to this repository:
+
+\begin{enumerate}
+
+\item The \texttt{./conf/gitolite.conf} configuration file. This file defines
+the users, repositories, and the users' permissions in these repositories.
+
+\item The \texttt{./keys} subdirectory which contains the public keys of all
+users of the system. The names of the key files designate the names of the
+users\cite{gitolite-com-2014d}.
+
+\item The \texttt{post-update} Git hook on the server side, parsing the above
+config and file and keys subdirectory and making adequate changes to the
+server repositories.
+
+\end{enumerate}
+
+It is important that access to this repository is safely guarded as it gives
+complete control over the users and repositories on the Git server.
+
 \subsubsection{Permissions}
+
+Permissions in gitolite are granted on a per repository basis. Every time a
+user attempts to perform a read or write operation on a repository, the user's
+action is matched against a series of rules. If none of the rules match, the
+user operation is denied.
+
+Permissions may be granted to the entire repository or just to a particular
+branch, tag, or even subfolder. Users may be granted, read, write, read-write,
+and even forced write permissions (more on this in the next section).  There
+are some even more fine grained permissions\cite{gitolite-com-2014e}, but we
+will not be concerned with them here.
 
 \subsection{Attack surface}
 
@@ -185,7 +233,7 @@ all of these session dialog options can be disabled for any key in the
 authorized keys file\cite{man-8-sshd}. By default, gitolite disables all of
 these options for all keys.
 
-\subsubsection{Forced push and rewriting history}
+\subsubsection{Forced push and rewriting history}\label{section:forced-push}
 
 Git has a, somewhat controversial\cite{torvalds-2007,hamano-2009,rego-2013},
 forced push feature. This bypasses the check that the remote ref being updated
@@ -201,6 +249,25 @@ to perform a forced push\footnote{As an experimental bug, teaching staff are
 still allowed to perform a forced push.}. This means that students cannot e.g.
 ammend to a commit that they have already pushed to the server. The students
 are encouraged to use \cite{man-1-git-revert} instead.
+
+\subsubsection{Git, OpenSSH, and Perl}
+
+Despite it's popularity, relatively few vulnerabilities have ever been found
+outside of the Git development team\cite{cvedetails-com-2014a}. The security of
+Git (out of the box) however, depends on the sensibility of the developers
+involved. Impersonification and private key leaks are not always well guarded
+against\cite{gerwitz-2013}, especially with the advent of modern Git hosting
+services\cite{homakov-2012,huang-2013,homakov-2014}.
+
+Likewise, OpenSSH has had relatively few vulnerabilities discovered outside of
+the OpenSSH development team\cite{cvedetails-com-2014b}. However, the
+underlying OpenSSL has been a lot less fortunate\cite{cvedetails-com-2014c}.
+
+Perl has been only a bit less fortunate\cite{cvedetails-com-2014d}.
+
+All of the above are popular pieces of software on public facing web servers.
+Their security is therefore a matter of grave public concern. The referenced
+material does not cover all of the underlying libraries of this software.
 
 \subsection{Discussion}
 
@@ -259,20 +326,5 @@ redirected to the client\cite{man-5-githooks}. Although this allows to present
 the test results immediately, it is unclear where the test results should be
 persisted.
 
-\subsection{Installation}
-
-Pull the most recent version of git from your package manager.
-
-Create a git user with shell /bin/git-shell (or similar).
-
-http://git-scm.com/docs/git-shell
-
-Make sure he's passwordless.
-
-Set up .ssh/authorized\_keys check permissions.
-
-http://stackoverflow.com/questions/6377009/adding-public-key-to-ssh-authorized-keys-does-not-log-me-in-automatically
-
-Permissions: http://www.openssh.com/faq.html\#3.14
-
+\subsubsection{Scalability}
 
