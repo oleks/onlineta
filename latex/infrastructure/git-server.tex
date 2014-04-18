@@ -328,3 +328,25 @@ persisted.
 
 \subsubsection{Scalability}
 
+We dedicate a Git branch to every student. To our knowledge, there is no
+practical limit on the number of branches in a Git repository. If there is a
+limit, it has to do with underlying file system limits, as every branch
+requires a separate file in a particular subdirectory. This limit should be in
+the manner of millions, and so not applicable in a course, department, or even
+a university context.
+
+Each time a client performs a Git operation, a connection to the Git server is
+established. The server performs one of a limited set of (presumably, finite)
+operations in a separate user session.
+
+To our knowledge, there are no practical limits the number of simultaneous
+connections to a Linux server, or simultaneous user sessions on a Linux server.
+Again if there are limits, it would be close to underlying file system limits,
+as connections and user sessions are typically file system bound on a Linux
+machine.
+
+The Git server should safely scale to a course, or a department, provided
+sufficient memory, CPU, and disk resources and speeds. On a university scale,
+it might be advisable to use a Git server per department, as OpenSSH operations
+are fairly CPU expensive.
+
