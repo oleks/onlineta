@@ -8,7 +8,9 @@ gateway between students and teaching staff, allowing for teaching staff to
 publish course content and assignments, and for students to make submissions.
 
 In the following we refer to student and staff collectively simply as clients,
-connecting to our host, the Git server.
+connecting to our host, the Git server. In
+\referToSection{git-server-scalability} we will discuss why we have just one
+Git server.
 
 \subsection{Why Git?}
 
@@ -357,6 +359,8 @@ We therefore do not find this to be an inconvenience.
 
 \subsubsection{Scalability}
 
+\label{section:git-server-scalability}
+
 We dedicate a Git branch to every student. To our knowledge, there is no
 practical limit on the number of branches in a Git repository. If there is a
 limit, it has to do with underlying file system limits, as every branch
@@ -386,7 +390,8 @@ resources. The limit can be found using:
 $ cat /proc/sys/kernel/pid_max
 \end{lstlisting}
 
-The Git server should safely scale to a course, or a department, provided
-sufficient memory, CPU, and disk resources and speeds. On a university scale,
-it might be advisable to use a Git server per department, as OpenSSH operations
-are fairly CPU intensive.
+A dedicated Git server should safely scale to a course, or a department,
+provided sufficient memory, CPU, and disk resources and speeds. On a university
+scale, it is advisable to use a Git server per department. OpenSSH operations
+are fairly CPU intensive, and many simultaneous submissions may lead us to hit
+the process number limits.
