@@ -3,20 +3,28 @@
 USER=$(whoami)
 DIR="measure"
 
-MEMCG="$(mktemp -d -p "/sys/fs/cgroup/memory/onlineta/" \
-  "$USER-exec-XXXXXX")"
+#MEMCG="$(mktemp -d -p "cgroup/memory/onlineta/" \
+#  "$USER-exec-XXXXXX")"
 
-for src in "$DIR/memory/"* ; do
-  dst="$MEMCG/$(basename "$src" | sed 's/max_usage/limit/')"
-  /bin/echo "$(( $(cat "$src") + 100 ))" > "$dst"
-done
+#for src in "$DIR/memory/"* ; do
+#  dst="$MEMCG/$(basename "$src" | sed 's/max_usage/limit/')"
+#  /bin/echo "$(( $(cat "$src") * 2 ))" > "$dst"
+#done
 
-echo 1 > "$MEMCG/memory.use_hierarchy"
-echo 0 > "$MEMCG/memory.swappiness"
+#CPU_TIME=$(cat "$DIR/cpu/cpuacct.usage")
+#SECONDS=$(( $CPU_TIME / 1000000000 ))
+#if [ "$SECONDS" -eq "0" ]; then # Support kernels < 2.6.17
+#  SECONDS=1
+#fi
 
-/usr/bin/env sh -c "echo \$\$ >> \"$MEMCG/tasks\" && $1"
+mount -t tmpfs -o size=1M tmpfs output
 
-cat "$MEMCG/memory.failcnt"
-#cat "$MEMCG/memory.stat"
+unshare -minpuf -- \
+  ./jail-init.sh
+#  ./libexec -g "$MEMCG/tasks" -t $(( $SECONDS * 2 )) "$@"
 
-rmdir "$MEMCG"
+# tar up output before umount!
+
+umount output
+
+#rmdir "$MEMCG"

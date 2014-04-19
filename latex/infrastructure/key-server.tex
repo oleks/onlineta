@@ -1,0 +1,61 @@
+% vim: set spell:
+
+\section{Key Server}
+
+The purpose of the key server is to provide a centralized registry of the
+public keys of students and staff. The key server is not intended to be a
+general-purpose public key server. It's intent is to serve as a certificate
+authority in a formal or semi-formal sense (see also
+\referToSection{gitolite-ssh-certificate-authority}).
+
+\subsection{Student Key Registration}
+
+An important role of the key server is to provide the means of registering
+student public keys, and validating that the keys belong to the said students.
+
+In a campus-based teaching environment, the teaching institution can serve as a
+validating authority. It is however, important that the registration and
+validation procedures do not disrupt teaching. A registration bot may be set up
+to aid in the matter. Let the bot be an agent with some designated
+private/public key pair.
+
+A teaching institution typically designates every student with a unique
+identifier. In an introductory lecture, the students may be presented with a
+fresh secret key, and asked to cite this secret key in an email to the bot,
+together with their unique identifier and public key.
+
+The message may be additionally encrypted with bot's public key, and signed by
+the student's private key.  This ensures that other students (and outsiders)
+cannot peek at a student's identity, and that a student provides a valid public
+key. A script can be provided to assist students in the matter.
+
+The bot may first check the student identifier against a list of course
+participants, provided by the teaching staff. If authorised, the bot associates
+the student identifier with the email address and public key. We can now engage
+in secure communication with the student.
+
+In the unlikely event of impersonification, a member of the teaching staff can
+go in and override this association with proper student credentials, or delete
+the record entirely. We trust that a campus-based teaching institution is
+capable of validating student identities on site. After all, if students are
+not technically able to participate in a course, they can be expected to
+eventually contact the teaching staff.
+
+The key server can retain the student's public keys across courses, and
+throughout their education. It would be a great contribution to the overall web
+of trust on the Internet, if the bot also signed the public keys and published
+them to a general-purpose public key server. Having obtained appropriate
+permission from the students, of course.
+
+\subsection{Staff Key Registration}
+
+Staff key registration can be left to more manual means. It is important that
+staff public keys are validated in person.
+
+\subsection{Serving Public Keys}
+
+The public key registry can serve as a basis for secure communication between
+the students and staff in general. The public key registry should therefore be
+made available on the teaching institution intranet, or even to the general
+public.
+

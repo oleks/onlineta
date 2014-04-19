@@ -1,0 +1,397 @@
+% vim: set spell:
+
+\section{Git Server}
+
+The purpose of the Git server is to serve as a general purpose data store for
+both course content, assignments, and student submissions. It serves as a
+gateway between students and teaching staff, allowing for teaching staff to
+publish course content and assignments, and for students to make submissions.
+
+In the following we refer to student and staff collectively simply as clients,
+connecting to our host, the Git server. In
+\referToSection{git-server-scalability} we will discuss why we have just one
+Git server.
+
+\subsection{Why Git?}
+
+Git is a popular\cite{ohloh-2014}, free, and open source distributed version
+control and source code management system\cite{git-2014}. Although perhaps not
+the ideal system for all intents and purposes, it is an excellent example that
+has cemented itself in both the open source community, academia and
+industry\cite{gitprojects-2014}.
+
+Version control and code review are some of the Core- Tier1 and Tier2 elements
+in \cite{cs-curricula-2013}. They are highly suggested topics for any
+undergraduate Computer Science programme.
+
+We hypothesize that using Git for programming assignments can spur the learning
+of some of the workflow of modern software development. Ideally, students
+collaborate on assignments, while teaching staff offer code reviews, all as if
+it were a real software development project.
+
+Git with authentication over SSH is an easy way to provide a scalable, online
+general purpose data store and gateway, having fine-grained and reliable
+authentication and authorisation procedures.
+
+\subsection{Course as a Repository}
+
+A Git server manages Git repositories. We choose to let a course be represented
+by a Git repository.
+
+A Git repository has one or more branches. We choose to let one branch - the
+master branch - be used for the distribution of course content and assignments
+by teaching staff. To make submissions, students create branches in their name
+and push their changes to these branches onto the server.
+
+Assessment of a student submission is provided in a special subdirectory on
+their private branch. All assessment is bound to particular commit by the
+student to a student branch.
+
+In such an infrastructure it is important that students are not allowed to push
+to the master branch, or to other student branches. At the same time, teaching
+staff should be allowed to push to both the master (to provide content and
+assignments) and student branches (to provide feedback). Last but not least, we
+would like to let everyone see course content and assignments, but prohibit
+them in seeing student submissions, or pushing to any of the branches.
+
+Such fine-grained authentication and authorisation can be achieved through
+OpenSSH and Git hooks.
+
+\subsection{OpenSSH}
+
+OpenSSH is a free (as in free speech) version of the SSH connectivity
+tools\cite{openssh-com-2014}.  The tools provide for secure encrypted
+communication between untrusted hosts over an insecure network\cite{man-1-ssh}.
+They include tools for user authentication, remote command execution, file
+management, etc.
+
+An OpenSSH host maintains a private/public key pair used to identify the host.
+Upon connection, the host offers its public key to the client, in hope that the
+client will accept it and (securely) proceed with authentication with the host.
+If authenticated, the client is mapped to a particular user on the host.  After
+some session preparation, the client, as that user, can start a session, i.e.
+request a shell or the execution of a command.
+
+One of the authentication methods supported by OpenSSH is using public key
+cryptography. The idea is that each client creates a private/public key pair,
+and informs the host of the public key over some otherwise secure channel, e.g.
+using a trusted keyserver.
+
+For any user on the host, a file can be created, e.g.
+\texttt{\textasciitilde/.ssh/authorized\_keys}, listing the public keys of
+those private/public key pairs that may be used to authenticate as that user.
+The format of this file\cite{man-8-sshd}, allows to specify additional options
+for each key. The options can be used to e.g. set a session-specific
+environment variable, or replace the command executed once the user is
+authenticated. The original command is then saved as the environment variable
+\texttt{SSH\_ORIGINAL\_COMMAND}.
+
+When using a Git server with OpenSSH, Git operations on the client, will
+attempt execute Git operations on the host. Per-key options can be used to make
+their execution dependent on the key used for authentication, e.g. performing
+authorisation.
+
+\subsection{Git Hooks}
+
+Git hooks is a Git mechanism for executing custom scripts when important events
+happen\cite{man-5-githooks}. The scripts can control in how far certain Git
+operations succeed. A Git hook is an adequately named executables placed in a
+special subdirectory in the local Git repository. Git hooks are not part of the
+version-controlled code base.
+
+For instance, the \texttt{update} hook is executed whenever the client attempts
+to push something to a branch. The client has already been authenticated, but
+no changes have yet been made. The hook is passed adequate arguments to
+identify the branch or tag being updated and the update taking place. If this
+hook exits with a non-zero exit value, the update will duly fail.
+
+\subsection{Users}
+
+When using a Git server with OpenSSH, clients must be mapped to users on the
+host. There are at least two options for the mapping: each client gets their
+own user, or all clients map to the same user. The first option has a higher
+administration costs, but gives perhaps more fine grained access control.
+
+The second option is generally more popular because of less cluttering of the
+UTS namespace. Additional tools, like gitolite, are instead used to provide a
+fine-grained access control layer. We too, have chosen this option.
+
+\subsection{Gitolite}
+
+Gitolite is an access control layer on top of Git\cite{gitolite-com-2014a}.
+Gitolite leverages the features of OpenSSH and Git hooks, as discussed above,
+to provide fine-grained authentication and
+authorisation\cite{gitolite-com-2014b}.
+
+Gitolite is used in multiple communities with high-stakes projects, such as
+Fedora, KDE, Gentoo, and kernel.org\cite{gitolite-com-2014c}. Among the reasons
+for choosing gitolite, kernel.org lists\cite{kernel-org-2014} ``well maintained
+and supported code base'', ``responsive development'', ``broad and diverse
+install base'', and ``had undergone an external code
+review''\cite{gitolite-google-group-2011}.
+
+There are also other tools out there, such as  Gerrit\footnote{See also
+\url{https://code.google.com/p/gerrit/}.} and Stash\footnote{See also
+\url{https://www.atlassian.com/software/stash}.}. Both of these provide a lot
+more than a simple access control layer.
+
+In conclusion, we chose to use gitolite ahead of both using other tools, and
+implementing our own solution.
+
+\subsubsection{Installation}
+
+Gitolite is installed on a per-user basis. Meaning that we should create and
+log in as some designated Git user to set up gitolite, or change ownership
+accordingly after install. As an extra security assurance, the gitolite
+installation does not require a privileged user, so long as Git, OpenSSH, and
+Perl are already installed.
+
+The code is distributed under a GNU General Public License, and is available at
+\url{git://github.com/sitaramc/gitolite}. We may wish to check out the latest
+tag (version), after verifying that it indeed was signed by Sitaram Chamarty
+(the original developer of Gitolite)\footnote{See also
+\url{http://git-scm.com/book/en/Git-Basics-Tagging}, if you are unfamiliar with
+Git's tagging mechanism.}. To the best of our knowledge, his public GPG key is:
+
+\begin{lstlisting}
+pub   4096R/088237A5 2011-10-25
+      Key fingerprint =
+        560A DA64 7542 816F 412E  5891 A442 9085 0882 37A5
+uid       Sitaram Chamarty (work email) <sitaram@atc.tcs.com>
+uid       Sitaram Chamarty <sitaramc@gmail.com>
+sub   4096R/8AC76EFB 2011-10-25
+\end{lstlisting}
+
+Once cloned and compiled, gitolite setup requires the administrator's public
+SSH key to be provided in some accessible file:
+
+\begin{lstlisting}
+$ ./gitolite setup -pk admin.pub
+\end{lstlisting}
+
+This initializes a git repository \texttt{gitolite-admin.git}, which
+\texttt{admin} has complete control over. This repository serves as the primary
+administrative interface for the gitolite access control layer.
+
+\begin{lstlisting}
+
+\end{lstlisting}
+
+\subsubsection{Administration}
+
+Administration of the gitolite happens through a special Git repository. There
+are three important elements to this repository:
+
+\begin{enumerate}
+
+\item The \texttt{./conf/gitolite.conf} configuration file. This file defines
+the users, repositories, and the users' permissions in these repositories.
+
+\item The \texttt{./keys} subdirectory which contains the public keys of all
+users of the system. The names of the key files designate the names of the
+users\cite{gitolite-com-2014d}.
+
+\item The \texttt{post-update} Git hook on the server side, parsing the above
+config and file and keys subdirectory and making adequate changes to the
+server repositories.
+
+\end{enumerate}
+
+It is important that access to this repository is safely guarded as it gives
+complete control over the users and repositories on the Git server.
+
+\subsubsection{Permissions}
+
+Permissions in gitolite are granted on a per repository basis. Every time a
+user attempts to perform a read or write operation on a repository, the user's
+action is matched against a series of rules. If none of the rules match, the
+user operation is denied.
+
+Permissions may be granted to the entire repository or just to a particular
+branch, tag, or even subfolder. Users may be granted, read, write, read-write,
+and even forced write permissions (more on this in the next section).  There
+are some even more fine grained permissions\cite{gitolite-com-2014e}, but we
+will not be concerned with them here.
+
+\subsection{Attack surface}
+
+\subsubsection{Login shell}
+
+It is often important with Git servers to disallow clients' shell requests.
+This is typically achieved by setting the user's login shell to something
+non-permissive, e.g. a \cite{man-1-git-shell}.
+
+This set up is perhaps a bit superfluous, as gitolite disables interactive
+shell login via the authorized keys file. Never-the-less it is a good extra
+level of security, as the login shell of any user can only be modified by a
+privileged user, which the \texttt{git} user is not.
+
+\subsubsection{Session preparation dialog}
+
+When a client is authenticated with OpenSSH, but before a user session starts,
+the client and the host enter into a session preparation dialog.
+
+The client can request a pseudo-tty (e.g. interactive shell), forwarding X11
+connections (e.g. remote desktop), forwarding TCP connections (e.g. virtual
+private networking), or forwarding the authentication agent connection over the
+secure channel (e.g. using the secure connection to establish other secure
+connections).
+
+All these options open up the attack surface of our Git server. Fortunately,
+all of these session dialog options can be disabled for any key in the
+authorized keys file\cite{man-8-sshd}. By default, gitolite disables all of
+these options for all keys.
+
+\subsubsection{Forced push and rewriting history}\label{section:forced-push}
+
+Git has a, somewhat controversial\cite{torvalds-2007,hamano-2009,rego-2013},
+forced push feature. This bypasses the check that the remote ref being updated
+should be an ancestor of the local ref used to overwrite
+it\cite{man-1-git-push}. Meaning that the branch being updated should be the
+strict base of the update.
+
+Forced push is dangerous because it incautiously overwrites history and can
+thereby inhibit assessment or even modify student records.
+
+This is mitigated for by gitolite permissions. Students are simply not allowed
+to perform a forced push\footnote{As an experimental bug, teaching staff are
+still allowed to perform a forced push.}. This means that students cannot e.g.
+ammend to a commit that they have already pushed to the server. The students
+are encouraged to use \cite{man-1-git-revert} instead.
+
+\subsubsection{Git, OpenSSH, and Perl}
+
+Despite it's popularity, relatively few vulnerabilities have ever been found
+outside of the Git development team\cite{cvedetails-com-2014a}.
+
+The security of Git (out of the box) however, depends on the sensibility of the
+developers involved. Impersonification and private key leaks are not always
+well guarded against\cite{gerwitz-2013}, especially with the advent of modern
+Git hosting services\cite{homakov-2012,huang-2013,homakov-2014}. It is the
+purpose of our Git server to serve as a guard against impersonification.
+Private key leaks are to be guarded against by the students themselves. 
+
+OpenSSH has also had relatively few vulnerabilities discovered outside of the
+OpenSSH development team\cite{cvedetails-com-2014b}. However, the underlying
+OpenSSL has been a lot less fortunate\cite{cvedetails-com-2014c}.
+
+Perl has only been a bit less fortunate\cite{cvedetails-com-2014d}.
+
+The referenced material does not cover all of the underlying libraries of the
+software. However, all of the above are popular pieces of software on public
+facing web servers.  Their security therefore, is a matter of grave public
+concern.
+
+\subsection{Discussion}
+
+\subsubsection{Pull requests}
+
+Our model of a student submission being a Git push to a student branch is not
+an accurate model of modern software development. In modern software
+development, a developer may work on their own branch (as our students would),
+and then make a ``pull request'' to merge their changes into the master branch.
+(Alternatively, a developer might work on in their own repository, and then
+make a pull request for their changes to be merged into the main project
+repository\cite{bird-et-al-2009}.)
+
+Such pull requests make little sense in education where all students are
+working on the same problem --- a scenario you'd often go to great lengths to
+avoid in industry. Instead, students are always allowed to submit what they
+have to their own branch. Code reviews are then done of snapshots of the
+student branch, e.g. automatically every time they push, or by a human at a
+nominal point in time.
+
+Alternatively, we could have chosen to have students make a pull request to a
+special ``submission branch'', with the other branch being a ``draft branch''.
+This would demand a more complicated set up of the Git server, perhaps using
+Gerrit or Stash, as mentioned above. The pull request could then be accepted
+if the code passed automatic code review.
+
+Unfortunately, it is sometimes instructional to give credit for an attempt at
+solving the problem. There may even come a situation where the student has made
+it to submit some basic working code in the submission branch but has a more
+comprehensive (non-working) solution in their draft branch. It would seem that
+this would gravely complicate matters for the subsequent human code review. In
+our model, the commit and test history of a branch is sufficient to reveal when
+the code had last worked.
+
+\subsubsection{Responding to students}
+
+Responding to students via a subdirectory in their private branch means that
+the students have to pull from their branch before they can make a subsequent
+submission (the race condition aside). This is good because it encourages
+students to read feedback and not to push in the blind. This is bad because it
+might inhibit quick (re)submissions (made within minutes): as practice shows,
+this is frequent close to a deadline.
+
+An alternative could be to distribute feedback in a separate private student
+branch, which is not writable by students. This is easy to set up in gitolite,
+but is more permissive of students pushing in the blind, ignoring all feedback.
+It also adds to the complexity of the student's view of the system: some
+students may fail to realise that feedback is being given at all.
+
+As another alternative, feedback could be provided interactively, as part of a
+Git push operation. For instance, in a \texttt{post-receive} or a
+\texttt{post-update} Git hook. These hooks lets us run custom scripts after the
+real work of a Git push is done. The benefit is that the connection to the
+client is not closed until these scripts end, and standard output and error are
+redirected to the client\cite{man-5-githooks}. Although this allows to present
+the test results immediately, it is unclear where the test results should be
+persisted.
+
+\subsubsection{SSH Certificate Authority}
+
+\label{section:gitolite-ssh-certificate-authority}
+
+Our choice of gitolite as the access control layer for our Git server,
+seemingly prohibits the use of an SSH certificate authority.
+
+An SSH certificate authority is a separate server that certifies client public
+keys.  This relinquishes a Git server of the need to keep public keys in an
+authorized keys file, and allows to keep a centralized (hiearchical) registry
+of client keys. Gitolite relies on the use of an authorized keys file.
+
+Certificate authorities however, still have to forward client certificates to
+the Git server. If forwarded on-demand, the certificate authority is a single
+point of failure. If forwarded on occasion, certificate authorities are
+functionally equivalent to using a Git repository over SSH, as with gitolite.
+We therefore do not find this to be an inconvenience.
+
+\subsubsection{Scalability}
+
+\label{section:git-server-scalability}
+
+We dedicate a Git branch to every student. To our knowledge, there is no
+practical limit on the number of branches in a Git repository. If there is a
+limit, it has to do with underlying file system limits, as every branch
+requires a separate file in a particular subdirectory. This limit should be in
+the manner of millions, and so not applicable in a course, or department
+context.
+
+Each time a client performs a Git operation, a connection to the Git server is
+established. The server performs one of a limited set of (presumably, finite)
+operations in a separate user session.
+
+To our knowledge, there are no practical limits on the number of simultaneous
+connections to a Linux server. The number of user sessions however, is bound by
+the maximum number of processes per user. (Later, we will use this feature to
+guard against fork bombs.) This limit can be found using:
+
+\begin{lstlisting}
+$ ulimit -u
+\end{lstlisting}
+
+Although this limit can be lifted, there is a more fundamental limit on the
+total number of processes for a Linux system. This limit is typically 32768. It
+should be increased with caution, and only if there are sufficient system
+resources. The limit can be found using:
+
+\begin{lstlisting}
+$ cat /proc/sys/kernel/pid_max
+\end{lstlisting}
+
+A dedicated Git server should safely scale to a course, or a department,
+provided sufficient memory, CPU, and disk resources and speeds. On a university
+scale, it is advisable to use a Git server per department. OpenSSH operations
+are fairly CPU intensive, and many simultaneous submissions may lead us to hit
+the process number limits.
