@@ -32,6 +32,13 @@ This chapter provides a high level overview of the chosen system architecture.
 We justify our choices, as well as discusses some of their benefits and
 downsides.
 
+Our current approach keeps students and staff close to the command line (as
+opposed to e.g. a web-based interface). The reason is part idealogical and part
+practical. We believe that students become better programmers when kept close
+to the command line. At the same time, it is easier to implement an
+infrastructure where the integrity and the authenticity of the data can be
+ensured. A myriad of tools exist,
+
 Overall, there are three types of servers involved: a key server, a Git server,
 and a test server. The communications between them and the students and
 teaching staff are roughly illustrated by \referToFigure{infrastructure}. Each
@@ -39,9 +46,7 @@ type of server may in reality be a set of interconnected servers balancing
 loads among each other, but fulfilling together the role of a single server
 type.
 
-This chapter discusses the three server types, communications between them, the
-students, and the teaching staff, as well as how and what data is stored by
-each of the server types.
+
 
 \includeFigure[0.75]{infrastructure}{Illustration of some of the system
 architecture. All communication happens over secure channels. Both students and

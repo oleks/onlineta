@@ -22,3 +22,34 @@ each other. We were like the police force in a violent slum.
 
 \end{quotation}
 
+Students submit digital files in response to assignments. Some of these files
+may specify executable computer programs. The automatic evaluation of student
+submissions constitutes the static and dynamic evaluation of such files. Static
+evaluation constitutes executing computer programs specified by the teaching
+staff, which read and analyze student files. In addition, dynamic evaluation
+includes executing the programs submitted by students.
+
+The student programs may misbehave in a myriad of different ways. The programs
+of the teaching staff, although more trustworthy, may also misbehave. If
+nothing else, they may undermine the misbehaviour of students. The intent of
+this chapter is to discuss the means in which we can mitigate for such
+misbehaviour for all parties, and ensure fair service.
+
+In the first section we provide a high-level overview of the technologies that
+can be used sandboxing. Here we come to the conclusion that operating-system
+level virtualization is a best candidate option. The remainder of the chapter
+deals with basic principles in the Linux kernel (version 3.14) that provide
+various means of virtualizing and limiting system resources.
+
+\input{sandboxing-untrusted-code/technology-overview}
+
+\input{sandboxing-untrusted-code/control-groups}
+
+\input{sandboxing-untrusted-code/namespaces}
+
+\input{sandboxing-untrusted-code/resource-limits}
+
+\input{sandboxing-untrusted-code/linux-security-modules}
+
+\input{sandboxing-untrusted-code/seccomp}
+

@@ -1,0 +1,51 @@
+% vim: set spell:
+
+\section{Technology Overview}
+
+There are two general approaches to providing sandboxed program execution
+environments. First is providing a sandboxed operating system, second is
+providing an isolated program execution environment within a regular operating
+system. Of course, the ``regular'' operating system may be sandboxed for other
+reasons, unrelated to the particular case of sandboxed program execution.
+
+\subsection{Dedicated Servers}
+
+We can provide an off-the-shelf operating system sandbox using a dedicated
+server for each executing program. This however, relinquishes remote control of
+the execution environment, and may demand physical access to the machine in
+case of failure. This is impractical.
+
+\subsection{Virtual Machines}
+
+The next option is to provide an operating system by means of hardware or
+software virtualization. This retains remote control of the execution
+environment. However, it imposes huge costs on every execution. An entire
+operating system has to boot up before testing can commence.
+
+Alternatively a pool of virtual machines could be kept online, pulling tasks
+from a task queue. Such a set up is not fail-fast, again because an entire
+operating system may have to be rebooted in case of failure. Moreover, virtual
+machines do not provide fine-grained control of system resources. Combined with
+empirical evidence that student programs fail often, this is impractical.
+
+Besides, such high-level virtualization makes the execution environment hard to
+monitor. The overhead of the operating system may dilute the true costs
+inherent in executing student or staff programs. This is desirable for the
+purposes of evaluation and sandbox tuning.
+
+\subsection{Operating system-level virtualization}
+
+\subsubsection{FreeBSD Jails}
+
+\subsubsection{Linux Kernel Containment}
+
+\begin{itemize}
+
+\item LXC
+
+\item libvirt-lxc
+
+\item Docker
+
+\end{itemize}
+
