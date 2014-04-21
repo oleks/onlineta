@@ -35,6 +35,15 @@ purposes of evaluation and sandbox tuning.
 
 \subsection{Operating system-level virtualization}
 
+Operating system-level virtualization avoids having a separate kernel for every
+program execution environment. Instead, multiple user space instances are
+virtualized on top of a single operating system kernel. Such an instance is
+typically called a jail or a container.
+
+The pitfall is that we become more vulnerable to vulnerabilities in the host
+kernel. If a program in a contained environment utilizes a kernel
+vulnerability, they may affect the entire system.
+
 \subsubsection{FreeBSD Jails}
 
 \subsubsection{Linux Kernel Containment}

@@ -1,0 +1,33 @@
+% vim: set spell:
+
+\section{Motivation}
+
+Our current approach keeps students and staff close to the command line (as
+opposed to e.g. using a web-based interface). The reason is part idealogical
+and part practical. We believe that students become better programmers when
+kept close to the command line. At the same time, it is easier to implement a
+comprehensive information security policy in a command line bound system. A
+myriad of free and open source command line tools exist for assuring integral
+and authentic data interchange.
+
+In particular, as an extra security precaution, we choose to encrypt student
+data, and have students digitally sign their data. This way, even if
+unauthorised users do gain access to the data, they still have to break the
+encryption to see the data, or fake a digital signature to tamper with it.  For
+now, it is hard to imagine, let alone implement, such precautions in a
+web-based interface.
+
+In the following subsections we briefly justify our choice of public key
+cryptography, and discuss various technologies that we can use to implement our
+cryptographic scheme.
+
+\subsection{Public Key Cryptography}
+
+\subsection{OpenSSL}
+
+OpenSSL is an open source implmentation of the SSL and TLS protocols, providing
+at the same time a comprehensive general purpose cryptography
+library\cite{openssl-org-2014}. Despite popular belief, the \texttt{openssl(1)}
+command-line utility can be used to encrypt and sign regular files.
+
+\subsection{OpenPGP}

@@ -84,6 +84,11 @@
   Table \textsection\ref{table:#1}/\pageref{table:#1}%
 }%
 
+\NewDocumentCommand\referToAppendix{m}%
+{%
+  \ref{appendix:#1}/\pageref{appendix:#1}%
+}%
+
 % sections
 
 \NewDocumentCommand\startSectionAux{O{\empty}O{section}mm}

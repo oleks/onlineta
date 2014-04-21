@@ -2,5 +2,89 @@
 
 \section{Control Groups}
 
-Control groups provide a mechanism of grouping tasks and their future children 
+Control groups (cgroups) provide a mechanism of hierarchically
+grouping/partitioning tasks (see also
+\referToAppendix{general-linux-concepts:tasks}) and their future
+children\cite{cgroups-cgroups-since-linux-3.14}. On their own, cgroups are
+perhaps only useful for simple job tracking. The idea, is to have other
+subsystems hook into the cgroups functionality and provide accounting or
+limiting of various system resources.
 
+The canonical cgroup subsystems include subsystems to monitor and limit memory,
+CPU time, I/O, and device activity. Most modern Linux distributions come with
+control groups and many of these canonical subsystems enabled. The system's
+\texttt{/proc/config.gz} can reveal the setup on your system\cite{man-5-proc}.
+If \texttt{CONFIG\_CGROUPS} is enabled, you have cgroups support. The variables
+related to various subsystems are explored further in the following
+subsections.
+
+In the first subsection, we discuss how cgroups can be accessed and manipulated
+from user space in general. The remaining subsections discuss the relevant
+canonical subsystems in greater depth.
+
+\subsection{Managing cgroups}
+
+Cgroups are managed via a pseudo-filesystem: cgroups reside in memory, but can
+be manipulated through the virtual file system.  \texttt{cgroup} is therefore
+an inherent file system type on systems that have the cgroups functionality
+enabled.
+
+When mounting a cgroup file system, we typically want to mount a particular
+control group hierarchy. A hierarchy is a set of cgroups arranged in a tree.
+Multiple subsystems can be combined and mounted onto a single target.  The
+subsystems to mount can be listed as mount options:
+
+\begin{lstlisting}
+$ mount -t cgroup -o cpu,cpuacct cgroup ./cgroup/cpu,cpuacct
+\end{lstlisting}
+
+This combines and mounts the \texttt{cpu} and \texttt{cpuacct} cgroup
+subsystems in the (pre-existing) subfolder \texttt{./cgroup/cpu,cpuacct}. Once
+a series of subsystems are mounted onto a target, the series can be mounted
+onto another target. However, the root hierarchies involved cannot be combined
+in new ways. For instance, the following fails with a rather cryptic message:
+
+\begin{lstlisting}
+$ mount -t cgroup -o cpu,memory cgroup ./cgroup/fun
+mount: cgroup is already mounted or ./cgroup/fun busy
+\end{lstlisting}
+
+How various cgroup root hierarchies are combined and mounted depends on the
+system at hand. The system's \texttt{/proc/mounts} can reveal how this is setup
+on your system.
+
+After a successful cgroup file system mount, we see a range of files below our
+target. Some files are common to all cgroups, others are specific to the chosen
+root hierarchies. We cover some of the common files below:
+
+\begin{description}[\setleftmargin{0.2in}\breaklabel\setlabelstyle{\tt}]
+
+\item [cgroup.procs] Lists the set of thread group IDs in the current cgroup.
+Appending a thread group ID to this file moves all the threads in the thread
+group into this cgroup.
+
+\item [tasks] Lists the set of thread IDs in the current cgroup. Appending a
+thread ID to this file moves the thread into this cgroup.
+
+\end{description}
+
+In addition to files, we see subfolders..
+
+We discuss the various cgroup type-specific files in the next subsections. Of
+interest to us here, is only the \texttt{tasks} file. Every cgroup has such
+file, listing a set of PIDs in this cgroup.  To add a task to a cgroup, we
+simply append its PID to the end of this file.
+
+Cgroups are hierarchical. To create a new subhierarchy 
+
+\subsection{memory}
+
+\subsection{cpuacct}
+
+\subsection{cpu}
+
+\subsection{cpuset}
+
+\subsection{devices}
+
+\subsection{blkio}

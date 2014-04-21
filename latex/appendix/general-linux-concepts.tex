@@ -1,0 +1,31 @@
+% vim: set spell:
+
+\chapter{General Linux Concepts}
+
+This chapter covers some general Linux concepts which are not necessarily to
+known to the canonical Linux user.
+
+\section{Tasks}
+
+\label{appendix:general-linux-concepts:tasks}
+
+The distinction between a thread and a process in the Linux kernel is somewhat
+more subtle than in textbook operating systems practice.
+
+In the Linux kernel, a thread of execution has a thread ID (also called a PID),
+a thread group ID, and a parent thread group ID. New threads of execution can
+be created using the \cite{man-2-clone} system call\footnote{The more canonical
+\cite{man-2-fork} system call is seldom used. Its behaviour can be mimicked by
+\cite{man-2-clone}. This is indeed what the standard glibc \texttt{fork()}
+function does.}. Depending on the parameters passed, the child can share
+various parts of its execution context with its parent. For instance, we may
+choose to stay under the same thread group ID, or parent thread group ID, share
+open files, memory, etc.
+
+A process is a nonempty set of threads that share the same thread group ID. A
+process is identified by its thread group ID. This is what is usually referred
+to as the PID in user space. The system calls \texttt{getpid()} and
+\texttt{getppid()} return the thread group ID and the parent thread group ID,
+respectively.
+
+A thread of execution is also called a task.
