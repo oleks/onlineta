@@ -29,10 +29,10 @@ be manipulated through the virtual file system.  \texttt{cgroup} is therefore
 an inherent file system type on systems that have the cgroups functionality
 enabled.
 
-When mounting a cgroup file system, we typically want to mount a particular
-control group hierarchy. A hierarchy is a set of cgroups arranged in a tree.
-Multiple subsystems can be combined and mounted onto a single target.  The
-subsystems to mount can be listed as mount options:
+When mounting a cgroup file system, we mount a particular control group
+hierarchy. A hierarchy is a set of cgroups arranged in a tree.  Multiple
+subsystems can be combined and mounted onto a single target.  The subsystems to
+mount can be listed as mount options:
 
 \begin{lstlisting}
 $ mount -t cgroup -o cpu,cpuacct cgroup ./cgroup/cpu,cpuacct
