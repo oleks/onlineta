@@ -184,16 +184,16 @@ are three important elements to this repository:
 
 \begin{enumerate}
 
-\item The \texttt{./conf/gitolite.conf} configuration file. This file defines
-the users, repositories, and the users' permissions in these repositories.
-
 \item The \texttt{./keys} subdirectory which contains the public keys of all
-users of the system. The names of the key files designate the names of the
-users\cite{gitolite-com-2014d}.
+users of the system, thereby defining the users. The names of the key files
+designate the user names\cite{gitolite-com-2014d}.
+
+\item The \texttt{./conf/gitolite.conf} configuration file. This file defines
+the repositories, and the users' permissions wrt. those repositories.
 
 \item The \texttt{post-update} Git hook on the server side, parsing the above
-config and file and keys subdirectory and making adequate changes to the
-server repositories.
+keys subdirectory and config file, making adequate changes to the server
+repositories.
 
 \end{enumerate}
 
