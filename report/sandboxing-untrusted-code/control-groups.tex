@@ -1,5 +1,7 @@
 % vim: set spell:
 
+% TODO: test instance
+
 \section{Control Groups}
 
 Control groups (cgroups) provide a mechanism of hierarchically
@@ -12,7 +14,7 @@ limiting of various system resources.
 
 The standard cgroup subsystems include subsystems to monitor and limit memory,
 CPU time, I/O, and device activity. Most modern Linux distributions come with
-control groups and many of these canonical subsystems enabled. The system's
+cgroups and many of these canonical subsystems enabled. The system's
 \texttt{/proc/config.gz} can reveal the setup on your system\cite{man-5-proc}.
 If \texttt{CONFIG\_CGROUPS} is enabled, you have cgroups support.
 
@@ -60,17 +62,20 @@ What hierarchies already exist, and what subsystems they are associated with,
 depends on the system at hand. The system's \texttt{/proc/mounts} can reveal
 how this is setup on your system\cite{man-5-proc}.
 
-\subsubsection{Tasks and nested cgroups}
+\subsubsection{Control files and child groups}
 
 After a hierarchy is successfully mounted, we see a range of files, and perhaps
-folders, below our target. We monitor/modify the preferences of a cgroup by
-monitoring/modifying these files. We create/remove child cgroups by
-creating/removing subdirectories.
+folders, below our target. We refer to these as control files and child groups,
+respecitvely.
 
-With a few exception at the root of the hierarchy, all cgroups contain the same
-files, created when the cgrpup is created. Some files are common to all
-hierarchies, others are due to the associated subsystems. Two files are of
-particular interest:
+We monitor/modify the preferences of a cgroup by monitoring/modifying control
+files. We create/remove child groups by creating/removing subdirectories below
+our target.
+
+With a few exceptions at the root of the hierarchy, all cgroups contain the
+same files, created when the cgrpup is created. Some files are common to all
+hierarchies, others are due to the associated subsystems. Two common files are
+of particular interest:
 
 \begin{description}[\setleftmargin{0.2in}\breaklabel\setlabelstyle{\tt}]
 
@@ -83,9 +88,117 @@ thread ID to this file moves the thread into this cgroup.
 
 \end{description}
 
+\subsubsection{Hierarchical accounting}
+
+Hierarchical accounting is when resource accounting is child group aware. All
+resource usage is summed up for all tasks in the cgroup, and recursively
+for all child groups. Limits are then emposed on the entire hierarchy. A
+subsystem does not necessarily perform hierarchical accounting.
+
+\subsection{The Resource Counter}
+
+\label{section:cgroups:resource-counter}
+
+The resource counter is a framework for managing a resource when using control
+groups.  The internal data structures aside, the framework makes
+recommendations wrt. the control files. A couple of the recommended control
+files are of interest to us:
+
+\begin{description}[\setleftmargin{0.2in}\breaklabel\setlabelstyle{\tt}]
+
+\item[<resource>.max\_usage\_in\_<unit\_of\_measurement>] Reading this file, we
+get the maximal usage of the resource over time, in the given units. Writing to
+this file, resets the value to the current usage of the resource. (The data
+written is ignored.)
+
+\item[<resource>.limit\_in\_<unit\_of\_measurement>] Reading this file, we get
+the maximal allowed usage of the resource, in the given units. Writing to this
+file resets the limit to the given value. A special value may indicate no
+limit.
+
+\end{description}
+
+These files are of interest to us as they allow us to probe the usage of a
+resource in a test instance and set up resource limits for students or staff.
+
 \subsection{memory}
 
+This subsystem allows us to monitor and limit the memory usage of the tasks in
+a cgroup. This includes both user and kernel memory and swap
+usage\cite{documentation-cgroups-memory.txt}.
+
+Due to the considerable overhead of memory and swap accounting, some
+distributions do not enable this cgroup, or merely do not enable swap
+accounting by default. The latter is especially misleading. If swapping is
+enabled, a memory limit with no swap limit has at best a hapless effect.
+
+You can check the setup on your system by checking the options prefixed with
+\texttt{CONFIG\_MEMCG\_} in your \texttt{/proc/config.gz}. Swap accounting can
+be enabled using the standard kernel parameter
+\texttt{swapaccount=1}\cite{documentation-kernel-parameters.txt}. Enabling the
+memory cgroup can be a little more distribution-specific.  In a Debian
+kernel, this can be done using the kernel parameter
+\texttt{cgroup\_enable=memory}\cite{hutchings-2011}.
+
+The memory subsystem uses a resource counter for a couple different memory
+resources. The resource counter control files (see also
+\referToSection{cgroups:resource-counter}) are prefixed as follows:
+
+\begin{description}[\setleftmargin{0.2in}\breaklabel\setlabelstyle{\tt}]
+
+\item[memory]
+
+The main memory counter. This includes both user and kernel memory.
+
+\item[memory.memsw]
+
+The main memory, plus swap. Limiting this value to the same value as the main
+memory controller, disables swap.
+
+\item[memory.kmem]
+
+Kernel memory. All kernel memory is also accounted for by the main memory
+counter. It is not necessary to limit this value if swapping is disabled and
+there is a limit on the main memory counter (since kernel memory cannot be
+swapped out).
+
+\item[memory.kmem.tcp]
+
+Kernel TCP buffer memory. Although we will disallow networking in general, it
+might be a good idea to 0-limit this resource as an extra precaution.
+
+\end{description}
+
+The limits and usage are always measured in bytes.
+
+Writing \texttt{-1} to \texttt{<resource>.limit\_in\_bytes} for any resource,
+removes the limit on the resource.
+
+The memory subsystem does not necessarily perform hierarchical accounting. This
+is enabled by writing \texttt{1} to the control file \texttt{use\_hierarchy} in
+the root cgroup.
+
 \subsection{cpuacct}
+
+The CPU accounting (cpuacct) subsystem allows us to monitor the CPU time usage
+of the tasks in a cgroup. The cpuacct subsystem always performs hierarchical
+accounting\cite{documentation-cgroups-cpuacct.txt}.
+
+The cpuacct subsystem provides a couple control files of interest:
+
+\begin{description}[\setleftmargin{0.2in}\breaklabel\setlabelstyle{\tt}]
+
+\item[cpuacct.usage] Shows the total CPU time spent by the cgroup, in
+nanoseconds.
+
+\item[cpuacct.usage\_percpu] Similar to \texttt{cpuacct.usage}, but shows the
+CPU time spent on each CPU core.
+
+\item[cpuacct.stat] Shows a further division of the CPU time spent: showing how
+much of the CPU time was spent running in user mode, and how much in kernel
+mode, using the \texttt{USER\_HZ} time unit.
+
+\end{description}
 
 \subsection{cpu}
 
