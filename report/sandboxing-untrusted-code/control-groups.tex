@@ -7,14 +7,13 @@
 Control groups (cgroups) provide a mechanism of hierarchically
 grouping/partitioning tasks (see also
 \referToAppendix{general-linux-concepts:tasks}) and their future
-children\cite{cgroups-cgroups-since-linux-3.14}. On their own, cgroups are
-perhaps only useful for simple job tracking. The idea, is to have other
-subsystems hook into the cgroups functionality and provide accounting or
-limiting of various system resources.
+children\cite{cgroups.txt}. On their own, cgroups are perhaps only useful for
+simple job tracking. The idea, is to have other subsystems hook into the
+cgroups functionality and provide for management of system resources.
 
 The standard cgroup subsystems include subsystems to monitor and limit memory,
 CPU time, I/O, and device activity. Most modern Linux distributions come with
-cgroups and many of these canonical subsystems enabled. The system's
+cgroups and many of these standard subsystems enabled. The system's
 \texttt{/proc/config.gz} can reveal the setup on your system\cite{man-5-proc}.
 If \texttt{CONFIG\_CGROUPS} is enabled, you have cgroups support.
 
@@ -38,6 +37,8 @@ cgroups in a hierarchy, associate their tasks with the same set of preferences.
 
 We say that a hierarchy is ``associated'' with a set of subsystems, and that a
 task is ``attached'' to a cgroup.
+
+(picture!!)
 
 \subsubsection{Mounting}
 
@@ -68,9 +69,9 @@ After a hierarchy is successfully mounted, we see a range of files, and perhaps
 folders, below our target. We refer to these as control files and child groups,
 respecitvely.
 
-We monitor/modify the preferences of a cgroup by monitoring/modifying control
-files. We create/remove child groups by creating/removing subdirectories below
-our target.
+We monitor/modify the preferences of a cgroup by monitoring/modifying the
+control files. We create/remove child groups by creating/removing
+subdirectories below our target.
 
 With a few exceptions at the root of the hierarchy, all cgroups contain the
 same files, created when the cgrpup is created. Some files are common to all
@@ -100,9 +101,9 @@ subsystem does not necessarily perform hierarchical accounting.
 \label{section:cgroups:resource-counter}
 
 The resource counter is a framework for managing a resource when using control
-groups.  The internal data structures aside, the framework makes
-recommendations wrt. the control files. A couple of the recommended control
-files are of interest to us:
+groups\cite{resource-counter.txt}.  The internal data structures aside, the
+framework makes recommendations wrt. the control files. A couple of the
+recommended control files are of interest to us:
 
 \begin{description}[\setleftmargin{0.2in}\breaklabel\setlabelstyle{\tt}]
 
@@ -123,9 +124,9 @@ resource in a test instance and set up resource limits for students or staff.
 
 \subsection{memory}
 
-This subsystem allows us to monitor and limit the memory usage of the tasks in
-a cgroup. This includes both user and kernel memory and swap
-usage\cite{documentation-cgroups-memory.txt}.
+The memory subsystem allows us to monitor and limit the memory usage of the
+tasks in a cgroup\cite{memory.txt}. This includes both user and kernel memory
+and swap usage.  The subsystem optionally performs hierarchical accounting.
 
 Due to the considerable overhead of memory and swap accounting, some
 distributions do not enable this cgroup, or merely do not enable swap
@@ -135,9 +136,9 @@ enabled, a memory limit with no swap limit has at best a hapless effect.
 You can check the setup on your system by checking the options prefixed with
 \texttt{CONFIG\_MEMCG\_} in your \texttt{/proc/config.gz}. Swap accounting can
 be enabled using the standard kernel parameter
-\texttt{swapaccount=1}\cite{documentation-kernel-parameters.txt}. Enabling the
-memory cgroup can be a little more distribution-specific.  In a Debian
-kernel, this can be done using the kernel parameter
+\texttt{swapaccount=1}\cite{kernel-parameters.txt}. Enabling the memory cgroup
+can be a little more distribution-specific.  In a Debian kernel, this can be
+done using the kernel parameter
 \texttt{cgroup\_enable=memory}\cite{hutchings-2011}.
 
 The memory subsystem uses a resource counter for a couple different memory
@@ -169,20 +170,18 @@ might be a good idea to 0-limit this resource as an extra precaution.
 
 \end{description}
 
-The limits and usage are always measured in bytes.
-
-Writing \texttt{-1} to \texttt{<resource>.limit\_in\_bytes} for any resource,
-removes the limit on the resource.
+The limits and usage are always measured in bytes. Setting the limit to
+\texttt{-1}, removes the limit on the resource.
 
 The memory subsystem does not necessarily perform hierarchical accounting. This
-is enabled by writing \texttt{1} to the control file \texttt{use\_hierarchy} in
-the root cgroup.
+can enabled by writing \texttt{1} to the \texttt{memory.use\_hierarchy} control
+file in the root cgroup.
 
 \subsection{cpuacct}
 
 The CPU accounting (cpuacct) subsystem allows us to monitor the CPU time usage
-of the tasks in a cgroup. The cpuacct subsystem always performs hierarchical
-accounting\cite{documentation-cgroups-cpuacct.txt}.
+of the tasks in a cgroup\cite{cpuacct.txt}. The cpuacct subsystem always
+performs hierarchical accounting.
 
 The cpuacct subsystem provides a couple control files of interest:
 
@@ -191,18 +190,78 @@ The cpuacct subsystem provides a couple control files of interest:
 \item[cpuacct.usage] Shows the total CPU time spent by the cgroup, in
 nanoseconds.
 
-\item[cpuacct.usage\_percpu] Similar to \texttt{cpuacct.usage}, but shows the
-CPU time spent on each CPU core.
+\item[cpuacct.usage\_percpu] Shows the total CPU time spent by the cgroup, for
+each CPU core, in nanoseconds.
 
-\item[cpuacct.stat] Shows a further division of the CPU time spent: showing how
-much of the CPU time was spent running in user mode, and how much in kernel
-mode, using the \texttt{USER\_HZ} time unit.
+\item[cpuacct.stat] Shows a further division of the CPU time spent. For now,
+showing how much of the CPU time was spent running in user mode, and how much
+in kernel mode, in the \texttt{USER\_HZ} time unit.
 
 \end{description}
 
 \subsection{cpu}
 
+The cpu subsystem facilitates CPU scheduling parameters for a
+cgroup\cite{sched-design-cfs.txt,sched-bwc.txt,sched-rt-group.txt}. The
+parameters currently facilitate control over two different schedulers in the
+Linux kernel:
+
+\begin{description}[\setleftmargin{0.2in}\breaklabel\setlabelstyle{\it}]
+
+\item[Completely Fair Scheduler (CFS)] A proprtional share CPU scheduler. The
+CPU time is divided fairly among tasks depending on their priority
+and the share assigned to their cgroup.
+
+\item[Real-Time Scheduler (RT)] A real-time scheduler for real-time tasks, i.e.
+tasks for which it is important to meet deadlines. For real-time tasks, a
+particular amount of CPU time must be guaranteed over a particular period of
+time.
+
+\end{description}
+
+For the RT scheduler, the subsystem parameters facilitate limiting how much CPU
+time the real-time tasks in a cgroup may spend in total over a period of time.
+Enforcing such limits and meeting real-time deadlines seems like a heedful
+task. For simplicity, we'll disallow students from spawning real-time tasks. In
+a default setup, spawning real-time tasks requires privileged access, which we
+already do not grant to our sandboxed programs.
+
+The CFS parameters facilitate first-and-foremost the enforcing of a lower bound
+on the amount of CPU time allocated to a cgroup. This is done by assigning a
+relative share (weight) to a cgroup. The shares are enforced, only if tasks
+from different cgroups are competing for CPU time. This means that if a cgroup
+gets no competition, it gets all the CPU time it wants.
+
+With the advent of ``cloud computing'' however, it has also become relevant to
+facilitate enforcing upper bounds on the CPU time over a period of
+time\cite{turner-et-al-2010}. This is facilitated similarly to the RT scheduler.
+
+We choose to let the students spend all the CPU time they want, as long as fair
+service is ensured for all students and staff. There is therefore only one
+control file in this subsystem of interest to us:
+
+\begin{description}[\setleftmargin{0.2in}\breaklabel\setlabelstyle{\tt}]
+
+\item[cpu.shares] Show/set the relative CPU time share of a cgroup. Two cgroups
+having share 100, will be given equal service. If one of the groups has share
+200, it gets twice as much CPU time under a fully-loaded system. This control
+file in the root cgroup, provides for a yard-stick for all other cgroups.
+
+\end{description}
+
+All these options do not allow us to hard limit the amount of CPU time used by
+a cgroup in total. To our knowledge there is no ``natural'' way of doing this
+in the Linux kernel. We must make due with limiting the wall-clock running time
+of an untrusted program.
+
 \subsection{cpuset}
+
+The cpusets subsystem allows us to assign a set of CPUs and a set of memory
+nodes to a cgroup. This can be used to further partition system resources from
+a fairly high level.
+
+We choose to let the system be runnable on commodity hardware. With few
+processor cores, and few memory nodes, this subsystem is of little use to us.
 
 \subsection{devices}
 

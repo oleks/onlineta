@@ -2,18 +2,22 @@
 
 \section{Technology Overview}
 
+A program is executed within a program execution environment. A sandboxed
+execution environment ensures the non-interference of the program with other
+programs being executed on the host.
+
 There are two general approaches to providing sandboxed program execution
-environments. First is providing a sandboxed operating system, second is
-providing an isolated program execution environment within a regular operating
-system. Of course, the ``regular'' operating system may be sandboxed for other
-reasons, unrelated to the particular case of sandboxed program execution.
+environments: sandboxing the operating system, or sandboxing within an
+operating system. The first two subsections discuss the former, the last
+subsection discusses the latter.
 
 \subsection{Dedicated Servers}
 
 We can provide an off-the-shelf operating system sandbox using a dedicated
-server for each executing program. This however, relinquishes remote control of
-the execution environment, and may demand physical access to the machine in
-case of failure. This is impractical.
+server for every program. This however, relinquishes remote control of the
+execution environment, and may demand physical access to the machine in case of
+failure. This is impractical. Also, this is expensive since most computer
+systems today are intended as time-sharing systems.
 
 \subsection{Virtual Machines}
 
@@ -23,26 +27,34 @@ environment. However, it imposes huge costs on every execution. An entire
 operating system has to boot up before testing can commence.
 
 Alternatively a pool of virtual machines could be kept online, pulling tasks
-from a task queue. Such a set up is not fail-fast, again because an entire
-operating system may have to be rebooted in case of failure. Moreover, virtual
-machines do not provide fine-grained control of system resources. Combined with
-empirical evidence that student programs fail often, this is impractical.
+from a task queue. Such a set up does not always fail fast, again because an
+entire operating system may have to be rebooted in case of failure. Combined
+with empirical evidence that student programs fail often, this is impractical.
 
-Besides, such high-level virtualization makes the execution environment hard to
+Such high-level virtualization also makes the execution environment hard to
 monitor. The overhead of the operating system may dilute the true costs
-inherent in executing student or staff programs. This is desirable for the
-purposes of evaluation and sandbox tuning.
+inherent in executing various programs. For similar reasons, fine-grained
+resource limits are often hard to enforce. All this is desirable for the
+purposes of evaluating our programs and tuning our sandboxes.
 
 \subsection{Operating system-level virtualization}
 
-Operating system-level virtualization avoids having a separate kernel for every
-program execution environment. Instead, multiple user space instances are
-virtualized on top of a single operating system kernel. Such an instance is
-typically called a jail or a container.
+Operating system-level virtualization alleviates the need for a separate kernel
+for sandboxing program execution environments.
 
-The pitfall is that we become more vulnerable to vulnerabilities in the host
-kernel. If a program in a contained environment utilizes a kernel
-vulnerability, they may affect the entire system.
+Time-sharing systems have for a long time provided for multiple simultaneous
+user space instances on top of a single kernel. Combined with file-system user
+permissions and user groups, these provided for the very first sandboxing
+capabilities.
+
+Recent developments in modern operating systems have facilitated more
+fine-grained sandboxing by virtualizing underlying system resources. Such a
+virtualized user space instance is typically called a ``jail'' or a
+``container''.
+
+The pitfall of operating system-level virtualization in general, is that we
+become more vulnerable to vulnerabilities in the kernel. If a contained program
+can utilize a kernel vulnerability, the whole system is under threat.
 
 \subsubsection{FreeBSD Jails}
 
