@@ -256,13 +256,53 @@ of an untrusted program.
 
 \subsection{cpuset}
 
-The cpusets subsystem allows us to assign a set of CPUs and a set of memory
-nodes to a cgroup. This can be used to further partition system resources from
-a fairly high level.
+The cpusets subsystem allows us to assign a set of CPU cores and a set of
+memory nodes to a cgroup. This can be used to further partition system
+resources from a fairly high level.
 
 We choose to let the system be runnable on commodity hardware. With few
 processor cores, and few memory nodes, this subsystem is of little use to us.
 
 \subsection{devices}
+
+The devices subsystem allows us to mandate access to device nodes (files) and
+device node creation\cite{devices.txt}. The limits are enforced hierarchically
+using whitelists --- a cgroup further down in the hierarchy cannot access
+devices to which access has not been granted further up in the hierarchy.
+
+A whitelist entry consists of four fields: the device node type, the major and
+minor device node identifiers (2 fields), and an access specifier.
+
+The device node type is either \texttt{c} for character, \texttt{b} for block,
+or \texttt{a} for all devices. \texttt{a} is a wildcard. Using it, discards all
+other options, and implies full access to all devices of all types. This is
+useful if you want to mandate universal access.
+
+The major and minor device identifiers is what Linux uses to uniquely identify
+devices.  The major and minor identifiers of a device can be found using
+\texttt{stat}.  For instance, the major and minor identifiers of
+\texttt{/dev/urandom} are typically 1 and 9, respectively:
+
+\begin{lstlisting}
+$ stat -c "%t:%T" /dev/urandom
+1:9
+\end{lstlisting}
+
+The access specifier is a sequence of characters, where \texttt{r} signifies
+read access, \texttt{w} write access, and \texttt{m} device node creation.
+
+The following control files facilitate device whitelist management:
+
+\begin{description}[\setleftmargin{0.2in}\breaklabel\setlabelstyle{\tt}]
+
+\item[devices.allow] Writing an entry to this file adds an entry to the device
+whitelist. Reading is prohibited.
+
+\item[devices.deny] Writing an entry to thisfile removes an entry from the
+device whitelist. Reading is prohibited.
+
+\item[devices.list] Shows the device whitelist. Writing is prohibited.
+
+\end{description}
 
 \subsection{blkio}
