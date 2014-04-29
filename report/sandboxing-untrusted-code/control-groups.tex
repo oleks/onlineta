@@ -265,31 +265,27 @@ processor cores, and few memory nodes, this subsystem is of little use to us.
 
 \subsection{devices}
 
-The devices subsystem allows us to mandate access to device nodes (files) and
-device node creation\cite{devices.txt}. The limits are enforced hierarchically
-using whitelists --- a cgroup further down in the hierarchy cannot access
-devices to which access has not been granted further up in the hierarchy.
+The devices subsystem allows us to mandate access to device nodes
+(files)\cite{devices.txt}. The limits are enforced hierarchically using
+whitelists --- a cgroup further down in the hierarchy cannot access devices to
+which access has not been granted further up in the hierarchy.
 
 A whitelist entry consists of four fields: the device node type, the major and
-minor device node identifiers (2 fields), and an access specifier.
+minor device node identifiers (2 fields), and an access specifier. The access
+specifier is a sequence of characters, where \texttt{r} signifies read access,
+\texttt{w} write access, and \texttt{m} device node creation.
 
 The device node type is either \texttt{c} for character, \texttt{b} for block,
 or \texttt{a} for all devices. \texttt{a} is a wildcard. Using it, discards all
 other options, and implies full access to all devices of all types. This is
-useful if you want to mandate universal access.
-
-The major and minor device identifiers is what Linux uses to uniquely identify
-devices.  The major and minor identifiers of a device can be found using
-\texttt{stat}.  For instance, the major and minor identifiers of
-\texttt{/dev/urandom} are typically 1 and 9, respectively:
+useful if you want to mandate universal access. The major and minor device
+identifiers is what Linux uses to uniquely identify devices.  The device node
+type, its major and minor identifiers of can be found using \texttt{stat}. 
 
 \begin{lstlisting}
-$ stat -c "%t:%T" /dev/urandom
-1:9
+$ stat --format "type:%F, major:%t, minor:%T" /dev/urandom 
+type:character special file, major:1, minor:9
 \end{lstlisting}
-
-The access specifier is a sequence of characters, where \texttt{r} signifies
-read access, \texttt{w} write access, and \texttt{m} device node creation.
 
 The following control files facilitate device whitelist management:
 
@@ -304,5 +300,10 @@ device whitelist. Reading is prohibited.
 \item[devices.list] Shows the device whitelist. Writing is prohibited.
 
 \end{description}
+
+The format of a whitelist entry is \texttt{<type> <major>:<minor> <spec>},
+where \texttt{<major>} and \texttt{<minor>} can be \texttt{*} indicating all
+versions. Writing \texttt{a} to \texttt{devices.allow} or \texttt{devices.deny}
+is the same as writing \texttt{a *:* rwm} to the same file.
 
 \subsection{blkio}
