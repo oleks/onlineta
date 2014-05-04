@@ -265,8 +265,8 @@ processor cores, and few memory nodes, this subsystem is of little use to us.
 
 \subsection{devices}
 
-The devices subsystem allows us to mandate access to device nodes
-(files)\cite{devices.txt}. The limits are enforced hierarchically using
+The devices subsystem allows us to mandate access to device nodes (files) using
+cgroups\cite{devices.txt}. The limits are enforced hierarchically using
 whitelists --- a cgroup further down in the hierarchy cannot access devices to
 which access has not been granted further up in the hierarchy.
 
@@ -307,3 +307,20 @@ versions. Writing \texttt{a} to \texttt{devices.allow} or \texttt{devices.deny}
 is the same as writing \texttt{a *:* rwm} to the same file.
 
 \subsection{blkio}
+
+The Block IO subsystem allows us to monitor and mandate access to I/O
+operations on block devices using cgroups\cite{blkio-controller.txt}. The
+monitoring parameters give grave insight into the I/O performance of the tasks
+in a cgroup. The access mandating parameters provide for proportional and
+absolute limits on the number of I/O operations by the tasks in a cgroup.
+
+We choose to not provide access to block devices to students in general. This
+is done due to the ease of implementation of a particular security policy.
+Giving unmandated access to a block device, in theory, gives unmandated access
+to all data on that device. Protecting data on such a device is a complicated
+matter. Although SELinux, with it's per-inode restrictions, could presumably be
+used to this end, it is easier to just not give access to block devices in
+general.
+
+As will be discussed later, this does not inhibit us in providing students with
+a read/write file system.
