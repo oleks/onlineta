@@ -310,9 +310,9 @@ is the same as writing \texttt{a *:* rwm} to the same file.
 
 The Block IO subsystem allows us to monitor and mandate access to I/O
 operations on block devices using cgroups\cite{blkio-controller.txt}. The
-monitoring parameters give grave insight into the I/O performance of the tasks
-in a cgroup. The access mandating parameters provide for proportional and
-absolute limits on the number of I/O operations by the tasks in a cgroup.
+monitoring parameters provide for insight into the I/O performance of a cgroup.
+The access mandating parameters provide for proportional and absolute limits on
+the number of I/O operations by a cgroup.
 
 We choose to not provide access to block devices to students in general. This
 is done due to the ease of implementation of a particular security policy.
@@ -323,4 +323,4 @@ used to this end, it is easier to just not give access to block devices in
 general.
 
 As will be discussed later, this does not inhibit us in providing students with
-a read/write file system.
+a general purpose read/write file system.
