@@ -12,14 +12,16 @@ simple job tracking. The idea, is to have other subsystems hook into the
 cgroups functionality and provide for management of system resources.
 
 The standard cgroup subsystems include subsystems to monitor and limit memory,
-CPU time, I/O, and device activity. Most modern Linux distributions come with
-cgroups and many of these standard subsystems enabled. The system's
+CPU time, I/O, and device activity. Subsystems therefore are often also called
+``resource controllers''. Many modern Linux distributions come with cgroups and
+many of these standard subsystems enabled. The system's
 \texttt{/proc/config.gz} can reveal the setup on your system\cite{man-5-proc}.
 If \texttt{CONFIG\_CGROUPS} is enabled, you have cgroups support.
 
 The variables related to various subsystems are explored further in the
 following subsections. First however, we discuss how cgroups can be accessed
-and manipulated from user space in general.
+and manipulated from user space in general, as well as discuss a general
+framework frequently used for resource management.
 
 \subsection{Managing cgroups}
 
@@ -30,20 +32,63 @@ enabled.
 
 \subsubsection{Cgroups, subsystems, and hierarchies}
 
-A cgroup is an association of a set of tasks with a set of preferences for one
-or more subsystems.  A hierarchy is a set of cgroups arranged in a tree; every
-task in the system is contained in exactly one cgroup of a hierarchy; all
-cgroups in a hierarchy, associate their tasks with the same set of preferences.
+A cgroup is an association of a set of tasks with a set of preferences for a
+set of subsystems.  A hierarchy is a set of cgroups arranged in a rooted tree.
+Every task in the system is attached to exactly one cgroup in the hierarchy.
+All cgroups in the hierarchy, associate their tasks with the same set of
+preferences --- we say that a hierarchy is associated with a set of
+subsystems\footnote{\cite{cgroups.txt} is ambiguous wrt. whether a hierarchy
+can exist without being associated with at least one subsystem. For the sake of
+simplicity, we'll assume that it can; although cgroups without associated
+subsystems have few practical applications, as already discussed above.}.
+\referToFigure{hierarchy-example} illustrates a couple example hierarchies.
 
-We say that a hierarchy is ``associated'' with a set of subsystems, and that a
-task is ``attached'' to a cgroup.
+\begin{figure}[h!]
 
-(picture!!)
+\centering
+
+\begin{tikzpicture}
+
+\draw (-3.5, 0) node(aa){$\chev{\set{1,2},\set{\alpha,\beta}}$};
+
+\draw (-5, -1) node(ab){$\chev{\set{3},\set{\alpha,\beta}}$};
+
+\draw (-2, -1) node(ac){$\chev{\set{},\set{\alpha\beta}}$};
+
+\draw (1.7, 0) node(ba){$\chev{\set{},\set{\gamma}}$};
+
+\draw (0.5, -1) node(bb){$\chev{\set{1},\set{\gamma}}$};
+
+\draw (3, -1) node(bc){$\chev{\set{2,3},\set{\gamma}}$};
+
+\draw [->] (aa) -- (ab);
+
+\draw [->] (aa) -- (ac);
+
+\draw [->] (ba) -- (bb);
+
+\draw [->] (ba) -- (bc);
+
+\end{tikzpicture}
+
+\caption[]{An illustration of two example cgroup hierarchies on a particular
+system. The set of identifiers of the tasks running on the system is
+$T=\set{1,2,3}$. The set of subsystems available on the system is
+$S=\set{\alpha,\beta,\gamma,\delta}$ (not all subsystems need be associated
+with a hierarchy). Every node (cgroup) has type
+$\mathcal{P}(T)\times\mathcal{P}(S)$, where $\mathcal{P}$ denotes the
+powerset.}
+
+\label{figure:hierarchy-example}
+
+\end{figure}
 
 \subsubsection{Mounting}
 
 When mounting a cgroup file system, we create a new hierarchy. The set of
-subsystems to associate with the hierarchy is listed as mount options:
+subsystems to associate with the hierarchy is listed as mount
+options\footnote{Omitting the subsystem list, attempts to associate all
+subsystems available on the system.}:
 
 \begin{lstlisting}
 $ mount -t cgroup -o cpu,cpuacct cgroup ./cgroup/cpu,cpuacct
