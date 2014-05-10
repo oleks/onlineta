@@ -1,0 +1,23 @@
+% vim: set spell:
+
+\chapter{Assessment Pipeline}
+
+When a student makes a submission, it needs to be assessed. The process of
+assessment is specified by the teaching staff, and may consist of a series of
+tasks --- an assessment pipeline.
+
+Concerned with assessment in Computer Science, there are two principal ways to
+assess a computer program --- statically, i.e. analyze the program text, and
+dynamically, i.e. execute the program. The static and dynamic analyses may
+furthermore be performed within various wrappers, e.g. monitors or
+interpreters.
+
+To execute a program, some input data may need to be generated. Useful programs
+will typically also produce some output data. Perhaps the student program is
+even interactive. This requires an interactive co-executing process.
+
+The output from static analyses, the execution of the program, the monitoring
+programs, is what we'll collectively call ``raw feedback''. This raw feedback
+may be too obscure or too detailed for a student to benefit from it. It may
+therefore be a good idea to post-process the raw feedback into a more
+fine-grained feedback for the student.
