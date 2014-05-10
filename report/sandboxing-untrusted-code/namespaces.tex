@@ -2,12 +2,74 @@
 
 \section{Namespaces}
 
-\subsection{UTS}
+The purpose of a Linux namespace is to abstract over a global resource, and
+make it appear to processes within the namespace, as though they have their own
+isolated instance of the global resource. Various types of namespaces allow to
+abstract over various global resources.
 
-\subsection{IPC}
+A task can be associated with a namespace using an \cite{man-2-unshare},
+\cite{man-2-setns}, or \cite{man-2-clone} system call. The first disassociates
+the process from a namespace, associating it with a new namespace. The second
+reassociates the process with an existing namespace. The last is the general
+system call for task creation, allowing to create a task in a new namespace.
 
-\subsection{PID}
+The namespaces that a task is associated with are identified in the
+\cite{man-5-proc} pseudo file system. The general pattern of the file names is
+\texttt{/proc/[pid]/ns/[nstype]}, where \texttt{[pid]} is the thread group
+identifier of the task (see also
+\referToAppendix{general-linux-concepts:tasks}), and \texttt{[nstype]} is one
+of a range of supported namespace types.
 
-\subsection{NET}
+We discuss some of these types in the following sections. Support for more
+types may come in the future, as containers demand more resource isolation.
+Furthermore, not all of these types are necessarily enabled on your system. The
+user namespace is frequently omitted by many distributions as it opens up a
+large part of the kernel, previously not available to the non-privileged user.
+Some believe it requires a lot more testing before being enabled by default.
 
-\subsection{USER}
+To our knowledge, enabling a namespace type requires compiling your own kernel.
+You can check which namespaces are enabled on your system, by reading the
+\texttt{/proc/config.gz} file, or listing the files in a process namespace
+subdirectory. For instance,
+
+\begin{lstlisting}
+$ ls /proc/$$/ns
+ipc  mnt  net  pid  uts
+\end{lstlisting}
+
+\subsection{mnt}
+
+The mount(mnt) namespace abstracts over the mount points of a system. This
+allows for processes in different namespaces to have different views of the
+file system. Within a container, we can unmount points that are perhaps needed
+by the host, but not by the container, and would perhaps make the host
+vulnerable, if the container had access to them.
+
+\subsubsection{Pivot root}
+
+One particularly useful application of mount namespaces is pivoting the file
+system root to some other point in the file system using
+\cite{man-2-pivot-root}. Pivoting the root in a container does not affect the
+host, or other containers. At the same time, pivoting the root moves all the
+dependencies on the old root, to a new root within the container.
+
+This allows us to subsequently unmount the old root, provided that the new root
+does not depend on this mount point. This can be achieved by having the new
+root mounted as a \texttt{tmpfs}, or perhaps a read-only \texttt{squashfs}.
+This hides the original root file system in a matter similar to
+\cite{man-2-chroot}, but makes reestablishing the old root slightly more
+cumbersome, since the old root first has to be properly remounted first.
+
+\subsection{uts}
+
+The UNIX Time-sharing System(UTS) namespace abstracts over the host- and domain
+name of a system. This allows each container to retain a personal host- and
+domain name, perhaps different from the underlying host.
+
+\subsection{ipc}
+
+\subsection{pid}
+
+\subsection{net}
+
+\subsection{usr}
