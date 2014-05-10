@@ -38,7 +38,7 @@ various analyses thereof, can be run in safe and fair environments, and how the
 various elements of an assessment engine can communicate via the operating
 system in a safe and secure way.
 
-\subsection{Environments}
+\subsection{Permissions and Restrictions}
 
 Assignments in Computer Science will often also ask students to write programs
 that operate within environments with particular permissions and restrictions.
@@ -47,8 +47,9 @@ adhered to. Both enable certain types of assessment. For instance, we may wish
 to permit that students can write to a particular file, but restrict how many
 I/O operations they may perform in total.
 
-A good reference set of permissions and restrictions might be the one for a
-course in operating systems programming in C.
+\subsection{A Reference Course}
+
+A good reference course, is a course in operating systems programming in C.
 
 C is ubiquitous on modern computer architectures, with the folklore that the
 first thing you should write for your new processor is a C compiler. We
@@ -60,11 +61,11 @@ again resort to writing assembly in C.
 
 Operating systems courses typically also involve a wide range of necessary
 permissions and restrictions. Especially if student programs are not written
-for some idealised, virtual environment (e.g. Buenos), but are intended to be
-run in the context of a real operating system.
+for some idealised, virtual environment (e.g. Buenos), but are intended for
+running in the context of a real operating system.
 
 Such programs may run into faults, make obscure system calls, access devices,
-perform I/O, not to mention run high on memory and CPU time. We conjecture,
+perform I/O, not to mention run high on memory use and CPU time. We conjecture,
 that if we can facilitate safe and fair environments for a course in operations
 systems programming in C, we can facilitate safe and fair environments for most
 courses in Computer Science.
