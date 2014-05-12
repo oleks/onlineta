@@ -10,22 +10,21 @@ known to the casual Linux user.
 \label{appendix:general-linux-concepts:tasks}
 
 The distinction between a thread and a process in the Linux kernel is somewhat
-more subtle than in textbook operating systems practice.
+more subtle than in operating systems textbooks.
 
-In the Linux kernel, a thread of execution has a thread ID (also called a PID),
-a thread group ID, and a parent thread group ID. New threads of execution can
-be created using the \cite{man-2-clone} system call\footnote{The more canonical
-\cite{man-2-fork} system call is seldom used. Its behaviour can be mimicked by
-\cite{man-2-clone}. This is indeed what the standard glibc \texttt{fork()}
-function does.}. Depending on the parameters passed, the child can share
-various parts of its execution context with its parent. For instance, we may
-choose to stay under the same thread group ID, or parent thread group ID, share
-open files, memory, etc.
+In the Linux kernel, a thread of execution, also called a task, has a thread ID
+(also called a PID inside the kernel), a thread group ID, and a parent thread
+group ID. New tasks can be created using the \cite{man-2-clone} system
+call\footnote{The more canonical \cite{man-2-fork} system call is seldom used.
+Its behaviour can be mimicked by \cite{man-2-clone}. This is indeed what the
+standard glibc \texttt{fork()} does.}. Depending on the parameters passed, the
+child task can share various parts of its execution context with its parent
+task. For instance, we may choose to stay under the same thread group ID, or
+parent thread group ID, share open files, memory, etc.
 
-A process is a nonempty set of threads that share the same thread group ID. A
-process is identified by its thread group ID. This is what is usually referred
-to as the PID in user space. The system calls \texttt{getpid()} and
-\texttt{getppid()} return the thread group ID and the parent thread group ID,
-respectively.
-
-A thread of execution is also called a task.
+A process is a nonempty set of tasks that share the same thread group ID. A
+process is identified by its thread group ID. This is what is commonly referred
+to as the PID in user space, whereas we refer to a thread ID as TID (unlike PID
+inside the kernel). The system calls \texttt{gettid(2)}, \texttt{getpid(2)} and
+\texttt{getppid(2)} return the thread ID, thread group ID, and parent thread
+group ID of the running task, respectively.

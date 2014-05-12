@@ -2,16 +2,28 @@
 
 \section{Namespaces}
 
-The purpose of a Linux namespace is to abstract over a global resource, and
-make it appear to processes within the namespace, as though they have their own
-isolated instance of the global resource. Various types of namespaces allow to
-abstract over various global resources.
+The purpose of a Linux namespace is to abstract over a system resource, and
+make it appear to tasks within the namespace, as though they have their own
+isolated instance of the global resource. Various namespace types abstract over
+various system resources.
 
-A task can be associated with a namespace using an \cite{man-2-unshare},
-\cite{man-2-setns}, or \cite{man-2-clone} system call. The first disassociates
+Namespaces are hierarchical in the following a sense: A system boots with one
+global namespace for each namespace type. A task created by a task within a
+particular namespace, is put in the same namespace by default. A task can be
+associated with a new child namespace, or some other namespace already in the
+hierarchy.
+
+We say that a parent namespace is a ``host'', and a child namespace is a
+``container''. A host may host many containers, and a container may have many
+hosts, namely all of its ancestors. Typically, we'll only talk about a host and
+a container in a direct child-parent relationship.
+
+A task can be associated with a namespace using the \cite{man-2-unshare},
+\cite{man-2-setns}, or \cite{man-2-clone} system calls. The first disassociates
 the process from a namespace, associating it with a new namespace. The second
 reassociates the process with an existing namespace. The last is the general
-system call for task creation, allowing to create a task in a new namespace.
+system call for task creation, allowing to create a task, already in a new
+namespace.
 
 The namespaces that a task is associated with are identified in the
 \cite{man-5-proc} pseudo file system. The general pattern of the file names is
@@ -30,16 +42,19 @@ Some believe it requires a lot more testing before being enabled by default.
 To our knowledge, enabling a namespace type requires compiling your own kernel.
 You can check which namespaces are enabled on your system, by reading the
 \texttt{/proc/config.gz} file, or listing the files in a process namespace
-subdirectory. For instance,
+subdirectory. For instance, listing the namespace diretory of the init process:
 
 \begin{lstlisting}
-$ ls /proc/$$/ns
-ipc  mnt  net  pid  uts
+$ sudo ls /proc/1/ns
+ipc  mnt  net  pid  uts  user
 \end{lstlisting}
+
+Some namespaces, such as mnt, pid, and net, require for a user to be priveleged
+to create a child namespace.
 
 \subsection{mnt}
 
-The mount(mnt) namespace abstracts over the mount points of a system. This
+The mount (MNT) namespace abstracts over the mount points of a system. This
 allows for processes in different namespaces to have different views of the
 file system. Within a container, we can unmount points that are perhaps needed
 by the host, but not by the container, and would perhaps make the host
@@ -62,14 +77,59 @@ cumbersome, since the old root first has to be properly remounted first.
 
 \subsection{uts}
 
-The UNIX Time-sharing System(UTS) namespace abstracts over the host- and domain
+The UNIX Time-sharing System (UTS) namespace abstracts over the host- and domain
 name of a system. This allows each container to retain a personal host- and
 domain name, perhaps different from the underlying host.
 
 \subsection{ipc}
 
+The Interprocess Communication (IPC) namespace abstracts over the IPC
+resources, in particular System V IPC objects and POSIX message queues. Each
+namespace is under the illusion that it has an isolated instance of these
+resources. This means that processess within one namespace cannot communicate
+with processes in another namespace using these primitives.
+
 \subsection{pid}
+
+The Process Identifier (PID) namespace abstracts over the task identifiers of a
+system. Tasks in different namespaces can have the same pid within their
+respective namespaces, but they all have distinct pid's on their hosts.
+Hierarchies are implemented for pid namespaces such that a host can see all the
+processes created within a container, while a container cannot see any of the
+processes on a host. Effectively, the first process in a child namespace gets
+pid 1, the same as an init process.
 
 \subsection{net}
 
-\subsection{usr}
+The Network (NET) namespace abstracts over the system resources associated with
+networking. Each network namespace has its own network devices, IP addresses,
+IP routing tables, port numbers, etc.
+
+We will in general prohibit students in doing in networking. This is easy to
+limit with a network namespace --- all networking configuration of the host is
+droppwed for a new child namespace.
+
+\subsection{user}
+
+The User (USER) namespace abstracts over the user and group ID number space.
+This means that the identifier of a particular user or group may differ across
+namespaces.
+
+Hierarchies are implemented such that a user id in a container is mapped to a
+user id on the host (and likewise for groups). A container is effectively
+unable to list the users of a host, while a host has complete control over the
+capabilities of the users in the container wrt. the host system. 
+
+We can have a particular designated ``container user'' on the host, and map
+this user to UID 0 in the container. This way, even if a malicious user managed
+to perform a privelege escalation within the container, this would merely
+correspond to some unpriveleged user on the host.
+
+This opens up containers to a wide range of capabilties, which would have
+otherwise required a privileged user on the host. For instance, containers can
+now be created using an unprivileged user in general, by creating a user
+namespace first.
+
+Arguably, this leaves too much of the kernel wide open for a container, and
+many find that user namespaces deserver to be tested further before being
+enabled by default\cite{kerrisk-2013, arch-linux-userns,fedora-userns}.
