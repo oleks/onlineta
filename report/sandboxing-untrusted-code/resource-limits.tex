@@ -1,3 +1,30 @@
 % vim: set spell:
 
 \section{Resource Limits}
+
+The system call \cite{man-2-getrlimit}, and it's sibling \texttt{setrlimit(2)}
+and \texttt{prlimit(2)}, can be used to manage per-user soft and hard limits on
+various resources. In general, when a process reaches a soft limit, it is
+warned, and upon reaching a hard limit it is killed, or simply prohibited in
+acquiring more of the resource.
+
+An unprivileged user can freely change their soft limit to any value between 0
+and the hard limit, or irreversibly lower their hard limit. A privileged user
+can freely change either value.
+
+Having a designated ``container'' user or group, we can enforce these limits at
+their login using Pluggable Authentication Modules (PAM). Of particular
+interest, is the \cite{pam-limits} module. We now discuss some interesting
+resources that we can limit, and how they can be of use.
+
+\subsection{nofile}
+
+The limit on the number of open files. This can be used to control how much I/O
+students perform and mitigate for various denial-of-service attacks.
+
+\subsection{nproc}
+
+The limit on the number of tasks that a user can create. This combined, with a
+limit on the wall-clock time can be used to mitigate for fork bombs. A fork
+bomb is a process that recursively creates new tasks in attempt to cause a
+denial-of-service.
