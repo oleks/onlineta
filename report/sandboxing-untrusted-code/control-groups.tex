@@ -20,8 +20,8 @@ If \texttt{CONFIG\_CGROUPS} is enabled, you have cgroups support.
 
 The variables related to various subsystems are explored further in the
 following subsections. First however, we discuss how cgroups can be accessed
-and manipulated from user space in general, as well as discuss a general
-framework frequently used for resource management.
+and manipulated from user space in general, as well as a general framework for
+resource management.
 
 \subsection{Managing cgroups}
 
@@ -138,7 +138,7 @@ thread ID to this file moves the thread into this cgroup.
 
 Hierarchical accounting is when resource accounting is child group aware. All
 resource usage is summed up for all tasks in the cgroup, and recursively
-for all child groups. Limits are then emposed on the entire hierarchy. A
+for all child groups. Limits are then imposed on the entire hierarchy. A
 subsystem does not necessarily perform hierarchical accounting.
 
 \subsection{The Resource Counter}

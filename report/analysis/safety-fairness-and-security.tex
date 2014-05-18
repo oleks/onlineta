@@ -2,14 +2,18 @@
 
 \section{Safety, Fairness, and Security}
 
-In the previous sections we used notions such as ``safe and fair environment'',
-as well as ``safe and secure communication''. In this section, we formalise
-these notions.
+In the past we've used notions such as ``safe and fair environment'', as well
+as ``safe and secure communication''. In this section, we formalise these
+notions.
 
 In general we seek that the running of other processes on the system does not
 interfere with the assessment of a submission. Other processes may be other
 assessments, or other parts of the system. This subdivides further into a set
 of safety, fairness and security requirements.
+
+For simplicity, we will assume that the system retains all course data, until
+all of it is securely wiped by a system administrator. It follows that some of
+the data may loose integrity or become vulnerable over time.
 
 % Ensure that when the system is busy, all running assessment get a fair share
 % of resources, and yet meet the requirements of their environments.
@@ -19,23 +23,21 @@ of safety, fairness and security requirements.
 \subsection{Safety}
 
 Safety requirements are concerned with ensuring the integrity of assessments
-over time.
-
-A process $p$ should not interfere with an assessment $a$, where $a\neq p$, in
-the sense that the feedback generated from assessment $a$, is the same,
-regardless of whether process $p$ is ever run or not.
+over time: A process $p$ should not interfere with an assessment $a$, where
+$a\neq p$, in the sense that the feedback generated from assessment $a$, is the
+same, regardless of whether process $p$ is ever executed.
 
 \subsection{Fairness}
 
 Fairness requirements are concerned with ensuring that all assessments get a
-fair share of resources.
+fair share of system resources: A process $p$ should not interfere with an
+assessment $a$, where $a\neq p$, in the sense that the assessment $a$ gets
+allocated the same system resources, and should run in roughly the same wall
+clock time, regardless of whether process $p$ is ever executed.
 
-A process $p$ should not interfere with an assessment $a$, where $a\neq p$, in
-the sense that the assessment $a$ gets allocated the same system resources, and
-should run in roughly the same wall clock time, regardless of whether process
-$p$ is ever run or not. If wall-clock time cannot be guaranteed, an assessment
-should be queued on a first-come-first-serve basis, provided that a student can
-have at most one submission assessed at a time.
+If resources and wall-clock time cannot be guaranteed, an assessment should be
+queued on a first-come-first-serve basis, provided that a student can have at
+most one submission assessed at a time.
 
 \subsection{Security}
 
@@ -43,5 +45,24 @@ Security requirements are concerned with ensuring that no assessment is made
 vulnerable over time. An assessment is made vulnerable if it reveals data to
 unauthorised users.
 
-Who should be authorized to see what has already been discussed in
-\referToSection{analysis:roles-in-educational-assessment}.
+In \label{section:roles-in-educational-assessment}, we discussed various
+enrollee roles for a system.  Below, we whitelist permissions for all these
+roles.
+
+\begin{description}
+
+\item[Teaching Staff] \ \\ Can see all versions of and create new (or new
+versions of) learning content and assignments.  Can see all student submissions
+as well as processed and unprocessed feedback. Can create new versions of the
+processed feedback, adding to a previous version or discarding some of it.
+
+\item[Students] \ \\ Can see all versions of the learning content and
+assignments.  Can create new personal or group (done in a group with other
+students) submissions in response to assignments. Can see all past personal or
+group submissions.  Can see all versions of the processed feedback on the above
+submissions.
+
+\item[General Public] \ \\ Can see all versions of the learning content and
+assignments.
+
+\end{description}

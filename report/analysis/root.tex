@@ -2,6 +2,165 @@
 
 \chapter{Analysis}
 
+Students make submissions in response to assignments. We would like to assess
+their work with the assistance of computers.
+
+We can rely on students to attempt to deliver their submissions in a digital
+format, over an insecure network, e.g. the Internet. The network is insecure in
+the following sense: it cannot guarantee that a particular submission
+\begin{inparaenum}[(a)] \item comes from a particular student, nor \item that
+it has not been tampered with by an adversary.\end{inparaenum}
+
+In assessing programming assignments, we distinguish between two types of
+assessment. Static assessment is the analysis of a submission without executing
+student programs. Dynamic assessment is the analysis of the runtime behaviour
+of student programs. A static assessment often enables a subsequent dynamic
+assessment, and sometimes runs in lockstep with it.
+
+\section{Static Analyses}
+
+We may wish for a digital submission to adhere to a particular format, but we
+cannot rely on students to meet such requirements in general. One basic use of
+computer-assisted assessment is checking whether a submission meets certain
+formatting requirements, before any further assessment.
+
+For a programming assignment, we may wish for a submission to consist of a
+computer program and a report --- we'll use this as a running example.
+
+It is fairly straight-forward to enforce the requirement that a digital
+submission be a non-empty set of digital files, distinguished by their file
+names. Similarly, we can require files with particular names to be submitted,
+stating a particular file type.  For instance, two text files, named
+\texttt{main.c} and \texttt{report.txt}. It is also fairly straight-forward to
+enforce a limit on the sizes of the files in a submission.  This has some
+security benefits. % TODO: name them later.
+
+We may further enforce the requirement that particular files look like they are
+written in particular languages. For instance, that the computer program is
+written in C, and the report is written in English. We say ``look like''
+because neither language in this example has a formal definition, and so cannot
+be guaranteed to be recognisable by a computer, but both are in frequent use.
+
+For a lot of programming languages --- we're in luck --- the job of a parser,
+as part of e.g. a compiler or assembler, is indeed to recognise, whether a
+sequence of bits can be interpreted as a statement in that
+language\footnote{The question of whether a sequence of bytes can be
+interpreted as e.g. a C program, is often reduced to whether or not it is
+recognisable by a particular C compiler.}.
+
+With natural languages, being less formal in general, we're in a bit less luck.
+We can often analyse various features of a report probabilistically, with
+fairly high confidence. Notably, such probabilistic techniques give only
+limited corrective guidance. We conjecture that reports will require subsequent
+assessment by the teaching staff much more often than computer programs.
+
+Checking that a submission meets such requirements is usually a matter of
+static analysis. C++ Templates aside\cite{veldhuizen-2003}, checking that a
+submission meets programming language requirements should not result in the
+execution of programs written by students in a Turing-complete language.
+
+Putting a C program through a C compiler, we get an executable out. This
+enables a subsequent dynamic analysis. For other languages, we may perhaps only
+have a (lazy) interpreter, where the syntax of a part of a program is (only)
+checked immediately before it is executed. This would require checking a valid
+syntax requirement in lockstep with a dynamic analysis.
+
+We will often also want to check that the program is readable, testable, and
+maintainable by others, that it uses particular programming abstractions, and
+uses them right. This superimplies that we want submissions to include the
+source code of the programs. The above requirements can then be checked by
+checking that the source code adhere to comprehensive, assignment-specific,
+style guides.
+
+This amounts to a range of static analyses that we may want to perform, some of
+them in lockstep with dynamic analyses.
+
+\section{Dynamic Analyses}
+
+We are not only concerned with students submitting good-looking source code,
+but also that their programs solve the problem at hand. Sometimes, this can be
+answered by a static analysis. More often however, we must resort to executing
+the student programs and analyzing their runtime behaviour.
+
+Such programs often require some input data, and produce some output data ---
+they may even be interactive\footnote{For simplicity, we currently ignore
+assignments that require building a graphical user interface. This still leaves
+rich interactiveness capabilities.}. We need to generate data for our student
+programs and validate that the data they output is correct. For a particular
+assignment, we make the following observations:
+
+\begin{enumerate}[(a)]
+
+\item in how far an output is correct, may depend on the input;
+
+\item there may be more than one correct output for the same input.
+
+\end{enumerate}
+
+Other than produce wrong results, student programs may misbehave in a myriad of
+different ways, perhaps even intentionally. If let to their own devices,
+student programs may never terminate, abuse memory, leak memory, fiddle with
+devices, make obscure system calls, and generally fail in unpredictable ways.
+
+Of course, this also applies to static analyses. A static analysis can be
+thought of as an idealised computer, whose instructions are fed by the input to
+the analysis. The designer of a static analysis may not anticipate all the
+possible failure scenarios, or even let the language it accepts be
+Turing-complete.
+
+Such intentionally or unintentionally misbehaving analysis of submissions may
+interfere with other analyses on the system, causing faulty assessments, or
+even discarding assessments.
+
+We must protect against such abuse for both the static and dynamic analyses. We
+conjecture that the latter will be (unintentionally) abused more often than the
+former. We conjecture that good feedback on either abuse, but especially the
+dynamic assessment, can be an effective learning tool. For instance, a tight
+bound on time and space may train students to write more efficient programs.
+
+As we protect against such abuse, we must monitor the execution of student
+programs. The data gathered from this monitoring may also be useful for further
+feedback to the student.
+
+\section{Feedback}
+
+In case of failure, the feedback from the static and dynamic analyses may be
+generally incomprehensible to a human being\cite{lerner-et-al-2007}, let alone
+a student learning to program\cite{mccauley-et-al-2008}.
+
+In general, feedback is an important pedagogical tool. We would like to support
+processing the feedback, before it is delivered to the student. Such a
+processor may additionally be parametrised by the original submission and some
+student data to support e.g. individualized learning.
+
+This processing may include compounding feedback from the static and dynamic
+analyses to form a final feedback, providing hints to solve problems (instead
+of presenting error messages), or just pass or fail the submission without
+further note. We do not consider feedback processing beyond the notion that it
+is a parametrised process defined on a per-assignment basis. Providing good
+feedback in response to programming assignments is beyond the scope of this
+work.
+
+Feedback processing may include having a member of the teaching staff look over
+the feedback to make sure that it is correct, and often, add to it. For
+instance, the system may \begin{inparaenum}[(a)] \item validate that the
+student submission contains a computer program and a report, \item validate
+that it is written in the intended language, \item validate that it uses proper
+style, and expected programming abstractions, \item validate that it produces
+valid results and runs within the given resource bounds.\end{inparaenum}~This
+leaves it to the teaching staff to validate that the report properly reports
+about the written program.
+
+Human involvement does not need to happen before a student is informed of the
+original (automated) feedback. For instance, a common scenario might be that
+the student makes a sequence of submissions, in attempt to pass the automated
+testing. Once a submission passes, they can move on to a new assignment, while
+they wait for more extensive feedback on their submission. The teaching staff
+then, only look at the submission that passed the automated testing. Retaining
+old submissions may be useful to assessment in general. 
+
+\input{analysis/course-content}
+
 \input{analysis/safety-fairness-and-security}
 
 % \input{requirements-analysis/purpose-and-environment}
