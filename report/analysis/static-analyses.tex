@@ -1,0 +1,59 @@
+% vim: set spell:
+
+\section{Static Analyses}
+
+We may wish for a digital submission to adhere to a particular format, but we
+cannot rely on students to meet such requirements in general. One basic use of
+computer-assisted assessment is checking whether a submission meets certain
+formatting requirements, before any further assessment.
+
+For a programming assignment, we may wish for a submission to consist of a
+computer program and a report --- we'll use this as a running example.
+
+It is fairly straight-forward to enforce the requirement that a digital
+submission be a non-empty set of digital files, distinguished by their file
+names. Similarly, we can require files with particular names to be submitted,
+stating a particular file type.  For instance, two text files, named
+\texttt{main.c} and \texttt{report.txt}. It is also fairly straight-forward to
+enforce a limit on the sizes of the files in a submission.  This has some
+security benefits. % TODO: name them later.
+
+We may further enforce the requirement that particular files look like they are
+written in particular languages. For instance, that the computer program is
+written in C, and the report is written in English. We say ``look like''
+because neither language in this example has a formal definition, and so cannot
+be guaranteed to be recognisable by a computer, but both are in frequent use.
+
+For a lot of programming languages --- we're in luck --- the job of a parser,
+as part of e.g. a compiler or assembler, is indeed to recognise, whether a
+sequence of bits can be interpreted as a statement in that
+language\footnote{The question of whether a sequence of bytes can be
+interpreted as e.g. a C program, is often reduced to whether or not it is
+recognisable by a particular C compiler.}.
+
+With natural languages, being less formal in general, we're in a bit less luck.
+We can often analyse various features of a report probabilistically, with
+fairly high confidence. Notably, such probabilistic techniques give only
+limited corrective guidance. We conjecture that reports will require subsequent
+assessment by the teaching staff much more often than computer programs.
+
+Checking that a submission meets such requirements is usually a matter of
+static analysis. C++ Templates aside\cite{veldhuizen-2003}, checking that a
+submission meets programming language requirements should not result in the
+execution of programs written by students in a Turing-complete language.
+
+Putting a C program through a C compiler, we get an executable out. This
+enables a subsequent dynamic analysis. For other languages, we may perhaps only
+have a (lazy) interpreter, where the syntax of a part of a program is (only)
+checked immediately before it is executed. This would require checking a valid
+syntax requirement in lockstep with a dynamic analysis.
+
+We will often also want to check that the program is readable, testable, and
+maintainable by others, that it uses particular programming abstractions, and
+uses them right. This superimplies that we want submissions to include the
+source code of the programs. The above requirements can then be checked by
+checking that the source code adhere to comprehensive, assignment-specific,
+style guides.
+
+This amounts to a range of static analyses that we may want to perform, some of
+them in lockstep with dynamic analyses.

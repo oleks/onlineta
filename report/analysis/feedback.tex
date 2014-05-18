@@ -1,0 +1,38 @@
+% vim: set spell:
+
+\section{Feedback}
+
+In case of failure, the feedback from the static and dynamic analyses may be
+generally incomprehensible to a human being\cite{lerner-et-al-2007}, let alone
+a student learning to program\cite{mccauley-et-al-2008}.
+
+In general, feedback is an important pedagogical tool. We would like to support
+processing the feedback, before it is delivered to the student. Such a
+processor may additionally be parametrised by the original submission and some
+student data to support e.g. individualized learning.
+
+This processing may include compounding feedback from the static and dynamic
+analyses to form a final feedback, providing hints to solve problems (instead
+of presenting error messages), or just pass or fail the submission without
+further note. We do not consider feedback processing beyond the notion that it
+is a parametrised process defined on a per-assignment basis. Providing good
+feedback in response to programming assignments is beyond the scope of this
+work.
+
+Feedback processing may include having a member of the teaching staff look over
+the feedback to make sure that it is correct, and often, add to it. For
+instance, the system may \begin{inparaenum}[(a)] \item validate that the
+student submission contains a computer program and a report, \item validate
+that it is written in the intended language, \item validate that it uses proper
+style, and expected programming abstractions, \item validate that it produces
+valid results and runs within the given resource bounds.\end{inparaenum}~This
+leaves it to the teaching staff to validate that the report properly reports
+about the written program.
+
+Human involvement does not need to happen before a student is informed of the
+original (automated) feedback. For instance, a common scenario might be that
+the student makes a sequence of submissions, in attempt to pass the automated
+testing. Once a submission passes, they can move on to a new assignment, while
+they wait for more extensive feedback on their submission. The teaching staff
+then, only look at the submission that passed the automated testing. Retaining
+old submissions may be useful to assessment in general. 
