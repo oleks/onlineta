@@ -1,15 +1,15 @@
 % vim: set spell:
 
-\section{Assessment in Computer Science}
+\section{Assessment in Programming Education}
 
-Computer Science is the study of computable structures and processes. Computer
-Science professionals are (among other things) expected to be eloquent in the
-theory and practice of computer programming\cite{cs-curricula-2013}.
+%Computer Science is the study of computable structures and processes. Computer
+%Science professionals are (among other things) expected to be eloquent in the
+%theory and practice of computer programming\cite{cs-curricula-2013}. To this
+%end, practical work in the form of computer programming is a popular basis for
+%assessment in Computer Science\cite{carter-et-al-2003}.
 
-To this end, practical work is a popular basis for assessment in Computer
-Science\cite{carter-et-al-2003}. Practical work is concerned with the
-composition of programs to be executed by a computer, solving a particular
-problem.
+Computer programming is concerned with the construction of programs executable
+by a computer, solving a particular problem.
 
 To be executable by computers, computer programs are often written in highly
 rigorous languages, and so are amenable to assessment with the assistance of
@@ -21,45 +21,43 @@ can provide for some rigor. Students can be, and often are, expected to acquire
 skills in using various programming tools on their own account, or with some
 facilitation from their teachers.
 
+More often than not, computer programs are written for others than the original
+authors to use, test, and maintain.  Computer programming is therefore also
+often concerned with the construction of usable, testable, readable, and
+maintainable programs. To this end, for particular assignments, we may wish for
+students to practice following a particular style guide, or practice the use of
+a particular programming abstraction.
+
 \subsection{Programming Languages}
 
-Assignments in Computer Science will often ask students to write computer
+Assignments in compute programming will often ask students to write computer
 programs in one of a range of different programming languages. Programming
 languages come and go, and no language has emerged as the predominant one for
-teaching Computer Science. It is most useful, therefore, to facilitate
-assessment of programs written in any conceivable programming language.
+teaching programming. It is most useful, therefore, to facilitate assessment of
+programs written in any conceivable programming language.
 
-Modern programs always run within the context of an operating system. One way
-to stay programming language agnostic, is to facilitate assessment at the
-operating system level. This requires looking into how student programs, and
-various analyses thereof, can be run in safe and fair environments, and how the
-various elements of an assessment engine can communicate via the operating
+One way to stay programming language agnostic, is to facilitate assessment at
+the operating system level. This requires looking into how student programs,
+and various analyses thereof, can be run in safe and fair environments, and how
+the various elements of an assessment engine can communicate via the operating
 system in a safe and secure way.
 
-\subsection{Style Requirements}
+\subsection{Environments}
 
-In educating programming, we are only partially concerned with teaching
-students to build executable computer programs solving particular problems.
-Many programs are written in collaboration with others, and people other than
-the authors often end up testing and maintaining the source code.
-
-It is important that students learn to write readable, testable, and
-maintainable source code. This means writing source code so that it can be
-quickly grasped by others, using the right abstractions, and using the
-abstractions right. This includes e.g. checking adherence with a style guide.
-
-\subsection{Permissions and Restrictions}
-
-Assignments in Computer Science will often also ask students to write programs
+Assignments in computer programming will often ask students to write programs
 that operate within environments with particular permissions and restrictions.
-We should facilitate such permissions and ensure that the restrictions are
-adhered to. Both enable certain types of assessment. For instance, we may wish
-to permit that students can write to a particular file, but restrict how many
-I/O operations they may perform in total.
+We wish to facilitate such permissions and ensure that the restrictions are
+adhered to. For instance, we may wish to permit that students can write to a
+particular file, but restrict how many I/O operations they may perform in
+total.
 
-\subsection{A Reference Course}
+\subsection{Courses in Programming Education}
 
-A good reference course, is a course in operating systems programming in C.
+Confined to programming education, we may still hold a wide range of different
+courses, concerned with a particular programming language, particular
+programming techniques, or managing system resources. Considering which of
+these courses pose the biggest challenges to computer-assissted assessment,
+systems programming in C comes to mind.
 
 C is ubiquitous on modern computer architectures, with the folklore that the
 first thing you should write for your new processor is a C compiler. We
@@ -69,18 +67,18 @@ assembly in C. C is also ubiquitous on modern operating systems. Perhaps the
 most basic API that a modern operating system offers is a C API. If not, we can
 again resort to writing assembly in C.
 
-Operating systems courses typically also involve a wide range of necessary
+Systems programming typically also involves a wide range of necessary
 permissions and restrictions. Especially if student programs are not written
-for some idealised, virtual environment (e.g. Buenos), but are intended for
-running in the context of a real operating system.
+for some idealised, virtual environment (e.g. Buenos), but are intended for use
+in the context of a real system.
 
-Such programs may run into faults, make obscure system calls, access devices,
-perform I/O, not to mention run high on memory use and CPU time. We conjecture,
-that if we can facilitate safe and fair environments for a course in operations
-systems programming in C, we can facilitate safe and fair environments for most
-courses in Computer Science.
+Systems programs may run into faults, make obscure system calls, access
+devices, perform I/O, not to mention run high on memory use and CPU time. We
+conjecture, that if we can facilitate safe and fair environments for a course
+in systems programming in C, we can facilitate safe and fair environments for
+most courses in computer programming in general.
 
 We will however, make a few simplifying assumptions as we seek to meet certain
-safety, fairness, and security requirements. For instance, we will assume that
+safety, fairness, and security requirements. For instanc, we will assume that
 students do not need access to networking facilities, or access to more than a
-handful character devices.
+handful of character devices.
