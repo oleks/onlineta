@@ -7,12 +7,11 @@ but also that their programs solve the problem at hand. Sometimes, this can be
 answered by a static analysis. More often however, we must resort to executing
 the student programs and analyzing their runtime behaviour.
 
-Such programs often require some input data, and produce some output data ---
-they may even be interactive\footnote{For simplicity, we currently ignore
+Student programs often require some input data, and produce some output data
+--- they may even be interactive\footnote{For simplicity, we currently ignore
 assignments that require building a graphical user interface. This still leaves
-rich interactiveness capabilities.}. We need to generate data for our student
-programs and validate that the data they output is correct. For a particular
-assignment, we make the following observations:
+rich interactiveness capabilities.}. For a particular assignment, we make the
+following observations:
 
 \begin{enumerate}[(a)]
 
@@ -21,6 +20,10 @@ assignment, we make the following observations:
 \item there may be more than one correct output for the same input.
 
 \end{enumerate}
+
+This requires for an input generator and an output validator to run in lockstep
+with a student program. We'll regard them as simple interactive (stdin/stdout)
+processes, and leave their design to teaching staff in general.
 
 Other than produce wrong results, student programs may misbehave in a myriad of
 different ways, perhaps even intentionally. If let to their own devices,
@@ -33,16 +36,16 @@ the analysis. The designer of a static analysis may not anticipate all the
 possible failure scenarios, or even let the language it accepts be
 Turing-complete.
 
-Such intentionally or unintentionally misbehaving analysis of submissions may
-interfere with other analyses on the system, causing faulty assessments, or
-even discarding assessments.
+Such intentionally or unintentionally misbehaving analyses of submissions may
+interfere with other analyses, causing faulty assessments. We seek to protect
+against such abuse for both the static and dynamic analyses.
 
-We must protect against such abuse for both the static and dynamic analyses. We
-conjecture that the latter will be (unintentionally) abused more often than the
-former. We conjecture that good feedback on either abuse, but especially the
+We conjecture that the latter will be (unintentionally) abused more often than
+the former. Furthermore, good feedback on either abuse, but especially the
 dynamic assessment, can be an effective learning tool. For instance, a tight
 bound on time and space may train students to write more efficient programs.
 
-As we protect against such abuse, we must monitor the execution of student
-programs. The data gathered from this monitoring may also be useful for further
-feedback to the student.
+In general, dynamic analyses generate feedback wrt. whether the student program
+produces the expected results, and its resource use (or abuse). A misbehaving
+student program may be halted prematurely. We intend to process this feedback
+before handing it back to the students.
