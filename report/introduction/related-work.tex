@@ -12,8 +12,14 @@ Harvard has recently done a major redesign of their introductory Computer
 Science course, CS50\cite{malan-2010a}. They've moved to securely executing
 source code coming from students, and even arbitrary users on the
 Internet\cite{malan-2010b,malan-2013}. Many of the techniques they use, are
-(incidentally) also employed here.
+(incidentally) also employed here. We see similar work going on at the
+Standford Computer Security Lab\cite{stefan-2013}.
 
-(Learn By Hacking \& cjail by SCS.)
-
-(Online Judges)
+A related area of interest are so-called ``online judges'' for programming
+competitions. The stark difference stands in that an online judge seeks to find
+the \emph{first} contestants pass an assignment, whereas an online TA aids in
+getting \emph{all} students to eventually pass an assignment. The parallels can
+be drawn in that the incentives to use (and abuse) an ``online'' judge, are
+often similar to the incentives to use (and abuse) an ``online'' TA. A lot of
+work has been done in this area to provide for lightweight, safe, secure, and
+fair sandboxes for running arbitrary user code. See e.g. \cite{domjudge-2014}.
