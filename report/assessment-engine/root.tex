@@ -1,0 +1,34 @@
+% vim: set spell:
+
+\chapter{Assessment Engine}
+
+\begin{quotation}
+
+\footnotesize\sffamily\itshape
+
+\begin{flushright}
+
+/* War is peace. Verbosity is silence. MS\_VERBOSE is deprecated. */
+
+\smallbreak
+
+\upshape
+
+--- DAVID HOWELLS, Linux Source Code (2012)
+
+\end{flushright}
+
+\end{quotation}
+
+When a student makes a submission, it needs to be assessed. The
+assessment is specified by the teaching staff, and may consist of a range of
+static and dynamic analyses, as well as a feedback processing step.
+
+In general, we refer to these steps as the processes of an assessment. The
+processes of an assessment, each run their own sandbox and communicate with
+other processes using standard in/out, at most, files in an in-memory file
+system. 
+
+The combination of these sandboxed processes forms an assessment engine, taking
+the student submission in at one end, and producing ``student-friendly''
+feedback at the other.
