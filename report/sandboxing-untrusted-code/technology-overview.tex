@@ -71,26 +71,26 @@ only the containerisation options already available there.
 
 There exist a number of userspace interfaces to the Linux kernel containment
 features. We have found all these tools lacking in some respect, and so have
-gone with setting up our own lightweight interface. Ideally, we'd probably just
-contribute some changes to e.g. the LXC project. The process has however,
-provided for a better understanding of this part of the Linux kernel.
+gone with setting up our own lightweight interface\footnote{Ideally, we'd
+probably contribute adequate changes to e.g. the LXC project. The process has
+however, provided for a better understanding of this part of the Linux
+kernel.}.
 
 Linux Containers (LXC) were originally developed by Daniel Lezcano (IBM) to
 ease life for kernel developers working on the kernel containerisation
-features\footnote{See also \url{https://linuxcontainers.org/}.}. To our
-knowledge, LXC is the most feature-rich, and stable userspace interface to the
-Linux kernel containment features\cite{graber-2014}.
+features\cite{lxc-v1.0.3}. To our knowledge, LXC is the most feature-rich, and
+stable userspace interface to the Linux kernel containment
+features\cite{graber-2014}.
 
-We would like for the processes of a submission to run in separate sandboxes,
-and yet be able to communicate with one another. We would like for many
-submissions to be assessable at once, and for many sandboxes to share various
-resources, such as a read-only root file system.
+The general approach of LXC is to let you set up containers managed by an LXC
+daemon. It is fairly straight forward to set up independent containers for
+dedicated users, or shared read-only containers.
 
-LXC boasts pretty much all the features that we need, but we have been unable
-to set up mount points as we'd prefer. Also, LXC demands creating new, managed
-containers before code can be run in a sandbox. With our interface, sandboxes
-exist only for the lifetime of the sandboxed program, and sandboxes are
-fundamentally capable of sharing e.g. a read-only squashfs root file system.
+We would like to set up containers that share many resources (e.g. a read-only
+root file system), but differ in a few aspects (e.g. running an individual
+student program), and provide for a safe file system scratchspace for students.
+Also, we do not intend to retain our containers (only data) after the process
+in question has finished. In our experience, this is fairly laborious with LXC.
 
 There is also a range of high-level frameworks for managing Linux containers,
 using LXC, and other drivers. For instance, libvirt-lxc\footnote{See also

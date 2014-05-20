@@ -19,11 +19,14 @@ following observations:
 
 \item there may be more than one correct output for the same input.
 
+\item a subsequent input may depend on a previous output (interactiveness).
+
 \end{enumerate}
 
 This requires for an input generator and an output validator to run in lockstep
-with a student program. We'll regard them as simple interactive (stdin/stdout)
-processes, and leave their design to teaching staff in general.
+with the student program, perhaps as a single process. We'll regard them as
+simple interactive (stdin/stdout) processes, and leave their design to teaching
+staff in general.
 
 Other than produce wrong results, student programs may misbehave in a myriad of
 different ways, perhaps even intentionally. If let to their own devices,
