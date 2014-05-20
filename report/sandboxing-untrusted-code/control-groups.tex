@@ -4,16 +4,20 @@
 
 \section{Control Groups}
 
+\label{section:sandboxing:control-groups}
+
 Control groups (cgroups) provide a mechanism of hierarchically
 grouping/partitioning tasks (see also
 \referToAppendix{general-linux-concepts:tasks}), and their
-children\cite{cgroups.txt}. On their own, cgroups are perhaps only useful for
-simple job tracking. The idea, is to have other subsystems hook into the
-cgroups functionality and provide for management of system resources.
+children\cite{cgroups.txt}. Some more technical details, as well as less
+related aspects of cgroups are discussed in
+\referToAppendix{technical-details:control-groups}.
 
-The standard cgroup subsystems include subsystems to monitor and limit memory,
-CPU time, I/O, and device activity. Subsystems therefore are often also called
-``resource controllers''.
+On their own, cgroups are perhaps only useful for simple job tracking. The
+idea, is to have other subsystems hook into the cgroups functionality and
+provide for management of system resources. The standard cgroup subsystems
+include subsystems to monitor and limit memory, CPU time, I/O, and device
+activity. Subsystems therefore are often also called ``resource controllers''.
 
 \subsection{Managing cgroups}
 
@@ -25,7 +29,7 @@ inherent file system type on systems that have cgroups enabled.
 
 A cgroup is an association of a set of tasks with a set of preferences for a
 set of subsystems.  A hierarchy is a set of cgroups arranged in a rooted tree.
-Every task in the system is attached to exactly one cgroup in the hierarchy.
+Every task on the system is attached to exactly one cgroup in the hierarchy.
 All cgroups in the hierarchy, associate their tasks with the same set of
 preferences --- we say that a hierarchy is associated with a set of
 subsystems\footnote{\cite{cgroups.txt} is ambiguous wrt. whether a hierarchy
@@ -92,45 +96,39 @@ one of the subsystems is busy.
 A subsystem is busy e.g. if it is associated with a hierarchy having tasks
 attached.  Since a hierarchy is automatically attached to all tasks on the
 system, this effectively means that a subsystem may be associated with at most
-one hierarchy. If there alrewady exists a hierarchy, assosciated with the exact
-same set of subsystems, the hierarchy will be reused for the new mount.
-
-What hierarchies already exist, and what subsystems they are associated with,
-depends on the system at hand. The system's \texttt{/proc/mounts} can reveal
-how this is setup on your system\cite{man-5-proc}.
+one hierarchy. If there already exists a hierarchy, assosciated with the exact
+same set of subsystems, the hierarchy will be mirrored under the new target.
 
 \subsubsection{Control files and child groups}
 
 After a hierarchy is successfully mounted, we see a range of files, and perhaps
-folders, below our target. We refer to these as control files and child groups,
-respecitvely.
+folders, below our target.
 
-We monitor/modify the preferences of a cgroup by monitoring/modifying the
-control files. We create/remove child groups by creating/removing
-subdirectories below our target.
+We refer to these as control files and child groups, respecitvely. We
+monitor/modify the preferences of a cgroup by monitoring/modifying the control
+files. We create/remove child groups by creating/removing subdirectories below
+our target.
 
-With a few exceptions at the root of the hierarchy, all cgroups contain the
-same files, created when the cgrpup is created. Some files are common to all
-hierarchies, others are due to the associated subsystems. Two common files are
-of particular interest:
+With a few exceptions at the root of a hierarchy, all cgroups contain the same
+files, created when the cgroup is created. Some files are common to all
+hierarchies, others are due to the associated subsystems. One common file is of
+particular interest:
 
 \begin{description}[\setleftmargin{0.2in}\breaklabel\setlabelstyle{\tt}]
 
 \item [cgroup.procs] Lists the set of thread group IDs in the current cgroup.
-Appending a thread group ID to this file moves all the threads in the thread
-group into this cgroup.
-
-\item [tasks] Lists the set of thread IDs in the current cgroup. Appending a
-thread ID to this file moves the thread into this cgroup.
+Appending a thread group ID to this file attaches the thread group to this
+cgroup.
 
 \end{description}
 
 \subsubsection{Hierarchical accounting}
 
-Hierarchical accounting is when resource accounting is child group aware. All
-resource usage is summed up for all tasks in the cgroup, and recursively
-for all child groups. Limits are then imposed on the entire hierarchy. A
-subsystem does not necessarily perform hierarchical accounting.
+Hierarchical accounting when resource accounting is aware of the child groups
+of a cgroup.  For instance, all resource usage is summed up for all tasks in
+the cgroup, and recursively for all child groups.  Limits are then imposed on
+the subhierarchy rooted at the cgroup. A subsystem does not necessarily perform
+hierarchical accounting.
 
 \subsection{The Resource Counter}
 
@@ -164,19 +162,6 @@ The memory subsystem allows us to monitor and limit the memory usage of the
 tasks in a cgroup\cite{memory.txt}. This includes both user and kernel memory
 and swap usage.  The subsystem optionally performs hierarchical accounting.
 
-Due to the considerable overhead of memory and swap accounting, some
-distributions do not enable this cgroup, or merely do not enable swap
-accounting by default. The latter is especially misleading. If swapping is
-enabled, a memory limit with no swap limit has at best a hapless effect.
-
-You can check the setup on your system by checking the options prefixed with
-\texttt{CONFIG\_MEMCG\_} in your \texttt{/proc/config.gz}. Swap accounting can
-be enabled using the standard kernel parameter
-\texttt{swapaccount=1}\cite{kernel-parameters.txt}. Enabling the memory cgroup
-can be a little more distribution-specific.  In a Debian kernel, this can be
-done using the kernel parameter
-\texttt{cgroup\_enable=memory}\cite{hutchings-2011}.
-
 The memory subsystem uses a resource counter for a couple different memory
 resources. The resource counter control files (see also
 \referToSection{cgroups:resource-counter}) are prefixed as follows:
@@ -209,10 +194,6 @@ might be a good idea to 0-limit this resource as an extra precaution.
 The limits and usage are always measured in bytes. Setting the limit to
 \texttt{-1}, removes the limit on the resource.
 
-The memory subsystem does not necessarily perform hierarchical accounting. This
-can enabled by writing \texttt{1} to the \texttt{memory.use\_hierarchy} control
-file in the root cgroup.
-
 \subsection{cpuacct}
 
 The CPU accounting (cpuacct) subsystem allows us to monitor the CPU time usage
@@ -237,42 +218,22 @@ in kernel mode, in the \texttt{USER\_HZ} time unit.
 
 \subsection{cpu}
 
-The cpu subsystem facilitates CPU scheduling parameters for a
-cgroup\cite{sched-design-cfs.txt,sched-bwc.txt,sched-rt-group.txt}. The
-parameters currently facilitate control over two different schedulers in the
-Linux kernel:
+The cpu subsystem facilitates CPU scheduling parameters for a cgroup.
 
-\begin{description}[\setleftmargin{0.2in}\breaklabel\setlabelstyle{\it}]
+The parameters facilitate control over e.g. the Completely Fair Scheduler (CFS)
+in the Linux kernel\cite{sched-design-cfs.txt}. CFS is a proprtional share CPU
+scheduler. The CPU time is divided fairly among tasks depending on their
+priority and the share assigned to their cgroup.
 
-\item[Completely Fair Scheduler (CFS)] A proprtional share CPU scheduler. The
-CPU time is divided fairly among tasks depending on their priority
-and the share assigned to their cgroup.
+The CFS parameters facilitate first-and-foremost, the enforcing of a lower
+bound on the amount of CPU time allocated to a cgroup. This is done by
+assigning a relative share (weight) to each cgroup. The shares are enforced,
+only if tasks from different cgroups are competing for CPU time. This means
+that if a cgroup gets no competition, it gets all the CPU time it wants.
 
-\item[Real-Time Scheduler (RT)] A real-time scheduler for real-time tasks, i.e.
-tasks for which it is important to meet deadlines. For real-time tasks, a
-particular amount of CPU time must be guaranteed over a particular period of
-time.
-
-\end{description}
-
-For the RT scheduler, the subsystem parameters facilitate limiting how much CPU
-time the real-time tasks in a cgroup may spend in total over a period of time.
-Enforcing such limits and meeting real-time deadlines seems like a heedful
-task. For simplicity, we'll disallow students from spawning real-time tasks. In
-a default setup, spawning real-time tasks requires privileged access, which we
-already do not grant to our sandboxed programs.
-
-The CFS parameters facilitate first-and-foremost the enforcing of a lower bound
-on the amount of CPU time allocated to a cgroup. This is done by assigning a
-relative share (weight) to a cgroup. The shares are enforced, only if tasks
-from different cgroups are competing for CPU time. This means that if a cgroup
-gets no competition, it gets all the CPU time it wants.
-
-With the advent of ``cloud computing'' however, it has also become relevant to
-facilitate enforcing upper bounds on the CPU time over a period of
-time\cite{turner-et-al-2010}. This is facilitated similarly to the RT scheduler.
-
-We choose to let the students spend all the CPU time they want, as long as fair
+With the advent of ``cloud computing'', it has also become relevant to enforce
+upper bounds on the CPU time over a period of time\cite{turner-et-al-2010}. We
+choose to let the students spend all the CPU time they want, as long as fair
 service is ensured for all students and staff. There is therefore only one
 control file in this subsystem of interest to us:
 
@@ -280,24 +241,15 @@ control file in this subsystem of interest to us:
 
 \item[cpu.shares] Show/set the relative CPU time share of a cgroup. Two cgroups
 having share 100, will be given equal service. If one of the groups has share
-200, it gets twice as much CPU time under a fully-loaded system. This control
+200, it gets twice as much CPU time under a fully-loaded system. The control
 file in the root cgroup, provides for a yard-stick for all other cgroups.
 
 \end{description}
 
-All these options do not allow us to hard limit the amount of CPU time used by
-a cgroup in total. To our knowledge there is no ``natural'' way of doing this
-in the Linux kernel. We must make due with limiting the wall-clock running time
-of an untrusted program.
-
-\subsection{cpuset}
-
-The cpusets subsystem allows us to assign a set of CPU cores and a set of
-memory nodes to a cgroup. This can be used to further partition system
-resources from a fairly high level.
-
-We choose to let the system be runnable on commodity hardware. With few
-processor cores, and few memory nodes, this subsystem is of little use to us.
+The cpu subsystem paramenters do not allow us to hard limit the amount of CPU
+time used by a cgroup in total. To our knowledge there is no ``natural'' way of
+doing this in the Linux kernel. We must make due with limiting the wall-clock
+time of our programs.
 
 \subsection{devices}
 
@@ -312,51 +264,19 @@ specifier is a sequence of characters, where \texttt{r} signifies read access,
 \texttt{w} write access, and \texttt{m} device node creation.
 
 The device node type is either \texttt{c} for character, \texttt{b} for block,
-or \texttt{a} for all devices. \texttt{a} is a wildcard. Using it, discards all
-other options, and implies full access to all devices of all types. This is
-useful if you want to mandate universal access. The major and minor device
-identifiers is what Linux uses to uniquely identify devices.  The device node
-type, its major and minor identifiers of can be found using \texttt{stat}. 
+or \texttt{a} for all devices. Using \texttt{a}, discards all other options,
+and implies full access to all devices of all types. This is useful if you want
+to mandate universal access. The major and minor identifiers is what Linux uses
+to uniquely identify devices.
 
-\begin{lstlisting}
-$ stat --format "type:%F, major:%t, minor:%T" /dev/urandom 
-type:character special file, major:1, minor:9
-\end{lstlisting}
-
-The following control files facilitate device whitelist management:
+The following control files are of interest to us:
 
 \begin{description}[\setleftmargin{0.2in}\breaklabel\setlabelstyle{\tt}]
 
 \item[devices.allow] Writing an entry to this file adds an entry to the device
-whitelist. Reading is prohibited.
+whitelist.
 
 \item[devices.deny] Writing an entry to thisfile removes an entry from the
-device whitelist. Reading is prohibited.
-
-\item[devices.list] Shows the device whitelist. Writing is prohibited.
+device whitelist.
 
 \end{description}
-
-The format of a whitelist entry is \texttt{<type> <major>:<minor> <spec>},
-where \texttt{<major>} and \texttt{<minor>} can be \texttt{*} indicating all
-versions. Writing \texttt{a} to \texttt{devices.allow} or \texttt{devices.deny}
-is the same as writing \texttt{a *:* rwm} to the same file.
-
-\subsection{blkio}
-
-The Block IO subsystem allows us to monitor and mandate access to I/O
-operations on block devices using cgroups\cite{blkio-controller.txt}. The
-monitoring parameters provide for insight into the I/O performance of a cgroup.
-The access mandating parameters provide for proportional and absolute limits on
-the number of I/O operations by a cgroup.
-
-We choose to not provide access to block devices to students in general. This
-is done due to the ease of implementation of a particular security policy.
-Giving unmandated access to a block device, in theory, gives unmandated access
-to all data on that device. Protecting data on such a device is a complicated
-matter. Although SELinux, with it's per-inode restrictions, could presumably be
-used to this end, it is easier to just not give access to block devices in
-general.
-
-As will be discussed later, this does not inhibit us in providing students with
-a general purpose read/write file system.

@@ -8,142 +8,29 @@ This appendix covers some of the technical details related to this work.
 
 \section{Control Groups}
 
-Many modern Linux distributions come with cgroups and many of these standard
-subsystems enabled. The system's \texttt{/proc/config.gz} can reveal the setup
-on your system\cite{man-5-proc}.  If \texttt{CONFIG\_CGROUPS} is enabled, you
-have cgroups support. The variables related to various subsystems are explored
+\label{appendix:technical-details:control-groups}
+
+This section covers some of the technical details of our use of cgroups. This
+is not a general introduction to cgroups. For that, we refer you back to
+\referToSection{sandboxing:control-groups}.
+
+Many modern Linux distributions come with cgroups and many standard subsystems
+(as discussed in \referToSection{sandboxing:control-groups}) enabled.  Your
+system's \texttt{/proc/config.gz} can reveal the setup on your
+system\cite{man-5-proc}.  If \texttt{CONFIG\_CGROUPS} is enabled, you have
+cgroups support. The variables related to various subsystems are explored
 further in the following subsections.
 
-\subsection{Managing cgroups}
-
-Cgroups are managed via a pseudo-filesystem: cgroups reside in memory, but can
-be manipulated through the virtual file system.  \texttt{cgroup} is therefore
-an inherent file system type on systems that have the cgroups functionality
-enabled.
-
-\subsubsection{Cgroups, subsystems, and hierarchies}
-
-A cgroup is an association of a set of tasks with a set of preferences for a
-set of subsystems.  A hierarchy is a set of cgroups arranged in a rooted tree.
-Every task in the system is attached to exactly one cgroup in the hierarchy.
-All cgroups in the hierarchy, associate their tasks with the same set of
-preferences --- we say that a hierarchy is associated with a set of
-subsystems\footnote{\cite{cgroups.txt} is ambiguous wrt. whether a hierarchy
-can exist without being associated with at least one subsystem. For the sake of
-simplicity, we'll assume that it can; although cgroups without associated
-subsystems have few practical applications, as we have already discussed.}.
-\referToFigure{hierarchy-example} illustrates a couple example hierarchies.
-
-\begin{figure}[h!]
-
-\centering
-
-\begin{tikzpicture}
-
-\draw (-3.5, 0) node(aa){$\chev{\set{1,2},\set{\alpha,\beta}}$};
-
-\draw (-5, -1) node(ab){$\chev{\set{3},\set{\alpha,\beta}}$};
-
-\draw (-2, -1) node(ac){$\chev{\set{},\set{\alpha\beta}}$};
-
-\draw (1.7, 0) node(ba){$\chev{\set{},\set{\gamma}}$};
-
-\draw (0.5, -1) node(bb){$\chev{\set{1},\set{\gamma}}$};
-
-\draw (3, -1) node(bc){$\chev{\set{2,3},\set{\gamma}}$};
-
-\draw [->] (aa) -- (ab);
-
-\draw [->] (aa) -- (ac);
-
-\draw [->] (ba) -- (bb);
-
-\draw [->] (ba) -- (bc);
-
-\end{tikzpicture}
-
-\caption[]{An illustration of two example cgroup hierarchies on a particular
-system. The set of identifiers of the tasks running on the system is
-$T=\set{1,2,3}$. The set of subsystems available on the system is
-$S=\set{\alpha,\beta,\gamma,\delta}$ (not all subsystems need be associated
-with a hierarchy). Every node (cgroup) has type
-$\mathcal{P}(T)\times\mathcal{P}(S)$, where $\mathcal{P}$ denotes the
-powerset.}
-
-\label{figure:hierarchy-example}
-
-\end{figure}
+\subsection{Managing cgorups}
 
 \subsubsection{Mounting}
 
-What hierarchies already exist, and what subsystems they are associated with,
-depends on the system at hand. The system's \texttt{/proc/mounts} can reveal
-how this is setup on your system\cite{man-5-proc}.
-
-\subsubsection{Control files and child groups}
-
-After a hierarchy is successfully mounted, we see a range of files, and perhaps
-folders, below our target. We refer to these as control files and child groups,
-respecitvely.
-
-We monitor/modify the preferences of a cgroup by monitoring/modifying the
-control files. We create/remove child groups by creating/removing
-subdirectories below our target.
-
-With a few exceptions at the root of the hierarchy, all cgroups contain the
-same files, created when the cgrpup is created. Some files are common to all
-hierarchies, others are due to the associated subsystems. Two common files are
-of particular interest:
-
-\begin{description}[\setleftmargin{0.2in}\breaklabel\setlabelstyle{\tt}]
-
-\item [cgroup.procs] Lists the set of thread group IDs in the current cgroup.
-Appending a thread group ID to this file moves all the threads in the thread
-group into this cgroup.
-
-\item [tasks] Lists the set of thread IDs in the current cgroup. Appending a
-thread ID to this file moves the thread into this cgroup.
-
-\end{description}
-
-\subsubsection{Hierarchical accounting}
-
-Hierarchical accounting is when resource accounting is child group aware. All
-resource usage is summed up for all tasks in the cgroup, and recursively
-for all child groups. Limits are then imposed on the entire hierarchy. A
-subsystem does not necessarily perform hierarchical accounting.
-
-\subsection{The Resource Counter}
-
-\label{section:cgroups:resource-counter}
-
-The resource counter is a framework for managing a resource when using control
-groups\cite{resource-counter.txt}.  The internal data structures aside, the
-framework makes recommendations wrt. the control files. A couple of the
-recommended control files are of interest to us:
-
-\begin{description}[\setleftmargin{0.2in}\breaklabel\setlabelstyle{\tt}]
-
-\item[<resource>.max\_usage\_in\_<unit\_of\_measurement>] Reading this file, we
-get the maximal usage of the resource over time, in the given units. Writing to
-this file, resets the value to the current usage of the resource. (The data
-written is ignored.)
-
-\item[<resource>.limit\_in\_<unit\_of\_measurement>] Reading this file, we get
-the maximal allowed usage of the resource, in the given units. Writing to this
-file resets the limit to the given value. A special value may indicate no
-limit.
-
-\end{description}
-
-These files are of interest to us as they allow us to probe the usage of a
-resource in a test instance and set up resource limits for students or staff.
+A subsystem may be associated with at most one hierarchy. What hierarchies
+already exist, and what subsystems they are associated with, depends on the
+system at hand. The system's \texttt{/proc/mounts} can reveal how this is setup
+on your system\cite{man-5-proc}.
 
 \subsection{memory}
-
-The memory subsystem allows us to monitor and limit the memory usage of the
-tasks in a cgroup\cite{memory.txt}. This includes both user and kernel memory
-and swap usage.  The subsystem optionally performs hierarchical accounting.
 
 Due to the considerable overhead of memory and swap accounting, some
 distributions do not enable this cgroup, or merely do not enable swap
@@ -158,118 +45,23 @@ can be a little more distribution-specific.  In a Debian kernel, this can be
 done using the kernel parameter
 \texttt{cgroup\_enable=memory}\cite{hutchings-2011}.
 
-The memory subsystem uses a resource counter for a couple different memory
-resources. The resource counter control files (see also
-\referToSection{cgroups:resource-counter}) are prefixed as follows:
-
-\begin{description}[\setleftmargin{0.2in}\breaklabel\setlabelstyle{\tt}]
-
-\item[memory]
-
-The main memory counter. This includes both user and kernel memory.
-
-\item[memory.memsw]
-
-The main memory, plus swap. Limiting this value to the same value as the main
-memory controller, disables swap.
-
-\item[memory.kmem]
-
-Kernel memory. All kernel memory is also accounted for by the main memory
-counter. It is not necessary to limit this value if swapping is disabled and
-there is a limit on the main memory counter (since kernel memory cannot be
-swapped out).
-
-\item[memory.kmem.tcp]
-
-Kernel TCP buffer memory. Although we will disallow networking in general, it
-might be a good idea to 0-limit this resource as an extra precaution.
-
-\end{description}
-
-The limits and usage are always measured in bytes. Setting the limit to
-\texttt{-1}, removes the limit on the resource.
-
 The memory subsystem does not necessarily perform hierarchical accounting. This
 can enabled by writing \texttt{1} to the \texttt{memory.use\_hierarchy} control
 file in the root cgroup.
 
-\subsection{cpuacct}
-
-The CPU accounting (cpuacct) subsystem allows us to monitor the CPU time usage
-of the tasks in a cgroup\cite{cpuacct.txt}. The cpuacct subsystem always
-performs hierarchical accounting.
-
-The cpuacct subsystem provides a couple control files of interest:
-
-\begin{description}[\setleftmargin{0.2in}\breaklabel\setlabelstyle{\tt}]
-
-\item[cpuacct.usage] Shows the total CPU time spent by the cgroup, in
-nanoseconds.
-
-\item[cpuacct.usage\_percpu] Shows the total CPU time spent by the cgroup, for
-each CPU core, in nanoseconds.
-
-\item[cpuacct.stat] Shows a further division of the CPU time spent. For now,
-showing how much of the CPU time was spent running in user mode, and how much
-in kernel mode, in the \texttt{USER\_HZ} time unit.
-
-\end{description}
-
 \subsection{cpu}
 
-The cpu subsystem facilitates CPU scheduling parameters for a
-cgroup\cite{sched-design-cfs.txt,sched-bwc.txt,sched-rt-group.txt}. The
-parameters currently facilitate control over two different schedulers in the
-Linux kernel:
-
-\begin{description}[\setleftmargin{0.2in}\breaklabel\setlabelstyle{\it}]
-
-\item[Completely Fair Scheduler (CFS)] A proprtional share CPU scheduler. The
-CPU time is divided fairly among tasks depending on their priority
-and the share assigned to their cgroup.
-
-\item[Real-Time Scheduler (RT)] A real-time scheduler for real-time tasks, i.e.
-tasks for which it is important to meet deadlines. For real-time tasks, a
-particular amount of CPU time must be guaranteed over a particular period of
-time.
-
-\end{description}
+The cpu subsystem also facilitates control over the Real-Time scheduler (RT) of
+the Linux kernel\cite{sched-rt-group.txt}. RT schedules real-time tasks, i.e.
+tasks for which it is important to meet deadlines. A particular amount of CPU
+time must be guaranteed over a particular period of time.
 
 For the RT scheduler, the subsystem parameters facilitate limiting how much CPU
 time the real-time tasks in a cgroup may spend in total over a period of time.
 Enforcing such limits and meeting real-time deadlines seems like a heedful
 task. For simplicity, we'll disallow students from spawning real-time tasks. In
 a default setup, spawning real-time tasks requires privileged access, which we
-already do not grant to our sandboxed programs.
-
-The CFS parameters facilitate first-and-foremost the enforcing of a lower bound
-on the amount of CPU time allocated to a cgroup. This is done by assigning a
-relative share (weight) to a cgroup. The shares are enforced, only if tasks
-from different cgroups are competing for CPU time. This means that if a cgroup
-gets no competition, it gets all the CPU time it wants.
-
-With the advent of ``cloud computing'' however, it has also become relevant to
-facilitate enforcing upper bounds on the CPU time over a period of
-time\cite{turner-et-al-2010}. This is facilitated similarly to the RT scheduler.
-
-We choose to let the students spend all the CPU time they want, as long as fair
-service is ensured for all students and staff. There is therefore only one
-control file in this subsystem of interest to us:
-
-\begin{description}[\setleftmargin{0.2in}\breaklabel\setlabelstyle{\tt}]
-
-\item[cpu.shares] Show/set the relative CPU time share of a cgroup. Two cgroups
-having share 100, will be given equal service. If one of the groups has share
-200, it gets twice as much CPU time under a fully-loaded system. This control
-file in the root cgroup, provides for a yard-stick for all other cgroups.
-
-\end{description}
-
-All these options do not allow us to hard limit the amount of CPU time used by
-a cgroup in total. To our knowledge there is no ``natural'' way of doing this
-in the Linux kernel. We must make due with limiting the wall-clock running time
-of an untrusted program.
+do not want to grant students anyhow.
 
 \subsection{cpuset}
 
@@ -277,51 +69,27 @@ The cpusets subsystem allows us to assign a set of CPU cores and a set of
 memory nodes to a cgroup. This can be used to further partition system
 resources from a fairly high level.
 
-We choose to let the system be runnable on commodity hardware. With few
+We choose to let the system be runnable on commodity hardware. Having few
 processor cores, and few memory nodes, this subsystem is of little use to us.
 
 \subsection{devices}
 
-The devices subsystem allows us to mandate access to device nodes (files) using
-cgroups\cite{devices.txt}. The limits are enforced hierarchically using
-whitelists --- a cgroup further down in the hierarchy cannot access devices to
-which access has not been granted further up in the hierarchy.
-
-A whitelist entry consists of four fields: the device node type, the major and
-minor device node identifiers (2 fields), and an access specifier. The access
-specifier is a sequence of characters, where \texttt{r} signifies read access,
-\texttt{w} write access, and \texttt{m} device node creation.
-
-The device node type is either \texttt{c} for character, \texttt{b} for block,
-or \texttt{a} for all devices. \texttt{a} is a wildcard. Using it, discards all
-other options, and implies full access to all devices of all types. This is
-useful if you want to mandate universal access. The major and minor device
-identifiers is what Linux uses to uniquely identify devices.  The device node
-type, its major and minor identifiers of can be found using \texttt{stat}. 
+The device node type, its major and minor identifiers of can be found using
+\texttt{stat}. For instance,
 
 \begin{lstlisting}
 $ stat --format "type:%F, major:%t, minor:%T" /dev/urandom 
 type:character special file, major:1, minor:9
 \end{lstlisting}
 
-The following control files facilitate device whitelist management:
-
-\begin{description}[\setleftmargin{0.2in}\breaklabel\setlabelstyle{\tt}]
-
-\item[devices.allow] Writing an entry to this file adds an entry to the device
-whitelist. Reading is prohibited.
-
-\item[devices.deny] Writing an entry to thisfile removes an entry from the
-device whitelist. Reading is prohibited.
-
-\item[devices.list] Shows the device whitelist. Writing is prohibited.
-
-\end{description}
-
 The format of a whitelist entry is \texttt{<type> <major>:<minor> <spec>},
 where \texttt{<major>} and \texttt{<minor>} can be \texttt{*} indicating all
 versions. Writing \texttt{a} to \texttt{devices.allow} or \texttt{devices.deny}
 is the same as writing \texttt{a *:* rwm} to the same file.
+
+Reading \texttt{devies.allow} and \texttt{devices.deny} control files is
+prohibited. Instead, the current device whitelist for a cgroup can be inspected
+by reading the \texttt{devices.list} control file.
 
 \subsection{blkio}
 
