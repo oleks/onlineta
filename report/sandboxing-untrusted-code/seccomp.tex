@@ -1,3 +1,25 @@
 % vim: set spell:
 
 \section{Seccomp}
+
+Student programs may often be expected to use but a handful of system calls.
+Whitelisting the syscalls that students may use provides both for making sure
+that they use the intended tools, and that student programs cannot abuse
+obscure, or even vulnerable parts of the Linux kernel.
+
+The secure computing (seccomp) part of the Linux kernel is provides for such
+syscall filtering\cite{seccomp-filter.txt}.
+
+Seccomp was originally conceived by Andrea Arcangeli\cite{arcangeli-2005} while
+working on the cpushare project, a service that would let you to contribute
+your idle CPU, for those in need of CPU time\cite{lwn.net-2005}. This requires
+executing arbitrary code on your computer, and so limiting the allowed syscalls
+to read/write/exit/sigreturn was a simple sandboxing idea. The Chromium team
+has since worked on extending this functionality\cite{tinnes-2012} with an
+approach inspired by Berkley Packet Filters\cite{drewry-2012}.
+
+Seccomp filters can be applied using the \cite{man-2-prctl} system call. We can
+use this to specify a filter program, that given a particular syscall will
+reply whether the syscall should be executed or not. Some sample filter
+programs can be found in \cite{linux-kernel-v3.14.2}, under
+\texttt{./samples/seccomp/}.

@@ -2,14 +2,46 @@
 
 \section{Linux Security Modules}
 
-Linux Security Modules (LSM) is an access control framework, providing a
-mechanism for various security checks to be hooked by various kernel
-extensions\cite{wright-et-al-2002,lsm.txt}. The main use of LSM is the
-implementation of mandatory access controls.
+Linux Security Modules (LSM) is an access control framework. It provides a
+mechanism for various security checks to be raised whenever a kernel operation
+may result in an access control violation\cite{wright-et-al-2002,lsm.txt}.
+
+There are a number of competing kernel extensions which hook into the LSM
+framework to provide for comprehensive security policies. We discuss some of
+these below.
 
 \subsection{SELinux}
 
+The Security Enhanced Linux\textsuperscript{\textregistered} (SELinux) project
+predates LSM. It was initially envisioned inside the US National Security
+Agency (NSA). After 10 years of development and testing, it was released to the
+general public under a GPL license in 2000\cite{ivashko-2012}.
+
+When suggested to include it in the mainstream Linux kernel, Linus Torvalds
+charged the security community to make it a module instead, as there were other
+competing projects out there, e.g. AppArmor. The result was the implementation
+of LSM in the kernel\cite{wright-et-al-2002}.
+
 \subsection{AppArmor}
+
+AppArmor is perhaps a more community-driven alternative to SELinux, which is
+presumably easier to use and more portable than SELinux\cite{spenneberg-2006}.
+This sometimes comes at the cost of some security. For instance, with AppArmor,
+file system policies are enforced based on file paths, rather than inodes,
+protecting paths, not data.
 
 \subsection{Capabilities}
 
+Linux capabilities is an effort to subdivide the privileges of a privileged
+user into units. This allows to grant a user particular privileges, without
+making them privileged in general.
+
+Linux capabilities is the default LSM for the Linux kernel\cite{lsm.txt}.
+Rather intentionally, Linux capabilities provide only very coarse-grained
+access control options, compared to e.g. SELinux or AppArmor. For simplicity,
+we choose to deal with Linux capabilities rather than any other LSM.
+
+Linux capabilities are useful to us in connection with user namespaces. We may
+designate a container user or group on the host, having extended capabilities.
+This user may be used to create a user namespace, creating the illusion full
+capabilities, but having only limited capabilities on the host.
