@@ -2,29 +2,43 @@
 
 \section{Resource Limits}
 
-The system call \cite{man-2-getrlimit}, and it's sibling \texttt{setrlimit(2)}
+\label{section:sandboxing:resource-limits}
+
+The system call \cite{man-2-getrlimit}, and its siblings, \texttt{setrlimit(2)}
 and \texttt{prlimit(2)}, can be used to manage per-user soft and hard limits on
-various resources. In general, when a process reaches a soft limit, it is
-warned, and upon reaching a hard limit it is killed, or simply prohibited in
-acquiring more of the resource.
+various resources. In general, a process is warned upon reaching a soft limit,
+and killed, or prohibited in acquiring more of that resource, upon reaching a
+hard limit.
 
 An unprivileged user can freely change their soft limit to any value between 0
 and the hard limit, or irreversibly lower their hard limit. A privileged user
-can freely change either value.
+can freely change either value. Limits are enforced per user session, and are
+enforced throughout the lifetime of a user session.
 
-Having a designated ``container'' user or group, we can enforce these limits at
-their login using Pluggable Authentication Modules (PAM). Of particular
-interest, is the \cite{pam-limits} module. We now discuss some interesting
-resources that we can limit, and how they can be of use.
+We discuss some interesting
+possible limits below. Some further technical details are discussed in
+\referToAppendix{resource-limits}.
 
-\subsection{nofile}
+\begin{description}[\setleftmargin{0.2in}\breaklabel\setlabelstyle{\tt}]
 
-The limit on the number of open files. This can be used to control how much I/O
-students perform and mitigate for various denial-of-service attacks.
+\item[RLIMIT\_NPROC] A limit on the number of tasks a user can create per session.
 
-\subsection{nproc}
+\item[RLIMIT\_CPU] A limit on the total CPU time per process.
 
-The limit on the number of tasks that a user can create. This combined, with a
-limit on the wall-clock time can be used to mitigate for fork bombs. A fork
-bomb is a process that recursively creates new tasks in attempt to cause a
-denial-of-service.
+\item[RLIMIT\_CORE] A limit on the size of the core file.
+
+\end{description}
+
+\texttt{RLIMIT\_NPROC}, combined with \texttt{RLIMIT\_CPU} and a limit on the
+wall-clock time, can be used to mitigate for fork bombs, busy, and long-running
+processes. A fork bomb is a process that recursively creates new tasks in
+attempt to cause a denial-of-service. A limit on the wall-clock time ensures to
+kill off long-running processes which consume little to no CPU time, e.g.
+interactive processes waiting unduly for user input.
+
+Putting a limit on the core file size can be a good idea to prevent students
+from inspecting us inspecting the runtime of their programs. This may reveal
+certain aspects of the system, which they in turn may use to exploit it.
+
+There are other interesting limits, but combined with control groups, we have
+found these to be of little use.

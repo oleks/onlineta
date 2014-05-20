@@ -139,3 +139,17 @@ mainstream Linux distributions. As discussed in
 \referToSection{sandboxing:namespaces:user}, the user namespace is frequently
 disabled by default due to security concerns. To our knowledge, enabling
 support for a namespace type requires running a custom kernel in general.
+
+\section{Resource Limits}
+
+\label{appendix:resource-limits}
+
+This section covers some useful technical details of resource limits. This is
+not a general introduction to resource limits. For that, we refer you back to
+\referToSection{sandboxing:resource-limits}.
+
+Having a designated ``container'' user or group, we can enforce some of the
+resource limits at session set up using Pluggable Authentication Modules (PAM).
+In particular, the \cite{pam-limits} module. This module however, does not
+offer as fine-grained limits as the kernel primitives. For instance, it only allows
+to limit CPU time in terms of minutes, not seconds, as the kernel primitives.
