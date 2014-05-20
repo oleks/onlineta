@@ -10,8 +10,8 @@ This appendix covers some of the technical details related to this work.
 
 \label{appendix:technical-details:control-groups}
 
-This section covers some of the technical details of our use of cgroups. This
-is not a general introduction to cgroups. For that, we refer you back to
+This section covers some useful technical details of cgroups. This is not a
+general introduction to cgroups. For that, we refer you back to
 \referToSection{sandboxing:control-groups}.
 
 Many modern Linux distributions come with cgroups and many standard subsystems
@@ -109,3 +109,33 @@ general.
 
 As will be discussed later, this does not inhibit us in providing students with
 a general purpose read/write file system.
+
+\section{Namespaces}
+
+\label{appendix:namespaces}
+
+This section covers some useful technical details of namespaces. This
+is not a general introduction to namespaces. For that, we refer you back to
+\referToSection{sandboxing:namespaces}.
+
+The namespaces that a task is associated with can be listed using the
+\cite{man-5-proc} pseudo file system. There is a pseudo file
+\texttt{/proc/[pid]/ns/[nstype]}, for each thread group ID (\texttt{[pid]}) on
+the system, and for each namespace type (\texttt{[nstype]}) enabled on the
+system.
+
+You can check which namespace types are enabled on your system, by reading the
+\texttt{/proc/config.gz} file, or listing the files in a process namespace
+subdirectory. For instance, listing the namespaces subdiretory of the init
+process:
+
+\begin{lstlisting}
+$ sudo ls /proc/1/ns
+ipc  mnt  net  pid  uts  user
+\end{lstlisting}
+
+Not all namespace types supported by the Linux kernel are enabled by default in
+mainstream Linux distributions. As discussed in
+\referToSection{sandboxing:namespaces:user}, the user namespace is frequently
+disabled by default due to security concerns. To our knowledge, enabling
+support for a namespace type requires running a custom kernel in general.

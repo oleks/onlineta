@@ -2,55 +2,35 @@
 
 \section{Namespaces}
 
+\label{section:sandboxing:namespaces}
+
 The purpose of a Linux namespace is to abstract over a system resource, and
 make it appear to tasks within the namespace, as though they have their own
-isolated instance of the global resource. Various namespace types abstract over
-various system resources.
+independent instance of the resource. Various namespace types abstract over
+various system resources. For each namespace type, a task is associated with
+exactly one namespace of that type.
 
 Namespaces are hierarchical in the following a sense: A system boots with one
-global namespace for each namespace type. A task created by a task within a
-particular namespace, is put in the same namespace by default. A task can be
-associated with a new child namespace, or some other namespace already in the
-hierarchy.
+global namespace for each namespace type.  Tasks inherit their parent's
+namespaces by default. A task can be disassociated from a namespace and
+associated with another at runtime.
+
+A task can be associated with a namespace using the \cite{man-2-unshare},
+\cite{man-2-setns}, or \cite{man-2-clone} system calls.  The first
+disassociates the process from a namespace, associating it with a new
+namespace. The second, associates the process with an already existing
+namespace. The last is a general system call for task creation, allowing to
+create a task, already in a new namespace.
 
 We say that a parent namespace is a ``host'', and a child namespace is a
 ``container''. A host may host many containers, and a container may have many
-hosts, namely all of its ancestors. Typically, we'll only talk about a host and
-a container in a direct child-parent relationship.
+hosts, i.e. all of its ancestors. Typically, we'll only talk about a direct
+child-parent relationship.
 
-A task can be associated with a namespace using the \cite{man-2-unshare},
-\cite{man-2-setns}, or \cite{man-2-clone} system calls. The first disassociates
-the process from a namespace, associating it with a new namespace. The second
-reassociates the process with an existing namespace. The last is the general
-system call for task creation, allowing to create a task, already in a new
-namespace.
-
-The namespaces that a task is associated with are identified in the
-\cite{man-5-proc} pseudo file system. The general pattern of the file names is
-\texttt{/proc/[pid]/ns/[nstype]}, where \texttt{[pid]} is the thread group
-identifier of the task (see also
-\referToAppendix{general-linux-concepts:tasks}), and \texttt{[nstype]} is one
-of a range of supported namespace types.
-
-We discuss some of these types in the following sections. Support for more
-types may come in the future, as containers demand more resource isolation.
-Furthermore, not all of these types are necessarily enabled on your system. The
-user namespace is frequently omitted by many distributions as it opens up a
-large part of the kernel, previously not available to the non-privileged user.
-Some believe it requires a lot more testing before being enabled by default.
-
-To our knowledge, enabling a namespace type requires compiling your own kernel.
-You can check which namespaces are enabled on your system, by reading the
-\texttt{/proc/config.gz} file, or listing the files in a process namespace
-subdirectory. For instance, listing the namespace diretory of the init process:
-
-\begin{lstlisting}
-$ sudo ls /proc/1/ns
-ipc  mnt  net  pid  uts  user
-\end{lstlisting}
-
-Some namespaces, such as mnt, pid, and net, require for a user to be priveleged
-to create a child namespace.
+We discuss various namespace types in the following subsections. Some types,
+such as mnt, pid, and net, require for a user to be priveleged to create a
+child namespace. We also discuss some technical details in
+\referToAppendix{namespaces}.
 
 \subsection{mnt}
 
@@ -73,7 +53,7 @@ does not depend on this mount point. This can be achieved by having the new
 root mounted as a \texttt{tmpfs}, or perhaps a read-only \texttt{squashfs}.
 This hides the original root file system in a matter similar to
 \cite{man-2-chroot}, but makes reestablishing the old root slightly more
-cumbersome, since the old root first has to be properly remounted first.
+cumbersome, since the old root has to be properly remounted first.
 
 \subsection{uts}
 
@@ -84,10 +64,9 @@ domain name, perhaps different from the underlying host.
 \subsection{ipc}
 
 The Interprocess Communication (IPC) namespace abstracts over the IPC
-resources, in particular System V IPC objects and POSIX message queues. Each
-namespace is under the illusion that it has an isolated instance of these
-resources. This means that processess within one namespace cannot communicate
-with processes in another namespace using these primitives.
+resources, in particular System V IPC objects and POSIX message queues.
+Processes within one namespace cannot communicate with processes in another
+namespace using these primitives.
 
 \subsection{pid}
 
@@ -105,25 +84,23 @@ The Network (NET) namespace abstracts over the system resources associated with
 networking. Each network namespace has its own network devices, IP addresses,
 IP routing tables, port numbers, etc.
 
-We will in general prohibit students in doing in networking. This is easy to
+For simplicity, we'll prohibit students in doing in networking. This is easy to
 limit with a network namespace --- all networking configuration of the host is
-droppwed for a new child namespace.
+dropped for a new child namespace.
 
 \subsection{user}
 
+\label{section:sandboxing:namespaces:user}
+
 The User (USER) namespace abstracts over the user and group ID number space.
-This means that the identifier of a particular user or group may differ across
-namespaces.
+A new namespace has its own set of identifiers, starting at 0.
 
 Hierarchies are implemented such that a user id in a container is mapped to a
-user id on the host (and likewise for groups). A container is effectively
-unable to list the users of a host, while a host has complete control over the
-capabilities of the users in the container wrt. the host system. 
-
-We can have a particular designated ``container user'' on the host, and map
-this user to UID 0 in the container. This way, even if a malicious user managed
-to perform a privelege escalation within the container, this would merely
-correspond to some unpriveleged user on the host.
+user id on the host (and likewise for groups). For instance, we can have a
+particular designated ``container user'' on the host, and map this user to UID
+0 inside the container. This way, even if a malicious user managed to perform a
+privilege escalation within the container, this would merely correspond to an
+unprivileged user on the host.
 
 This opens up containers to a wide range of capabilties, which would have
 otherwise required a privileged user on the host. For instance, containers can
@@ -131,5 +108,5 @@ now be created using an unprivileged user in general, by creating a user
 namespace first.
 
 Arguably, this leaves too much of the kernel wide open for a container, and
-many find that user namespaces deserver to be tested further before being
+many find that user namespaces deserve to be tested further before being
 enabled by default\cite{kerrisk-2013, arch-linux-userns,fedora-userns}.
