@@ -3,70 +3,103 @@
 \section{Technology Overview}
 
 A program is executed within a program execution environment. A sandboxed
-execution environment ensures the non-interference of the program with other
-programs being executed on the host.
+execution environment ensures the non-interference of the sandboxed program
+with other programs on the system. There are two general approaches to
+sandboxing: sandboxing the operating system, or sandboxing programs within the
+operating system.
 
-There are two general approaches to providing sandboxed program execution
-environments: sandboxing the operating system, or sandboxing within an
-operating system. The first two subsections discuss the former, the last
-subsection discusses the latter.
+In \referToSection{analysis}, we discussed that for each submission we would
+like to run a range of static and dynamic analyses, and run their feedback
+through a feedback processor. Furthermore, a dynamic analysis constitutes
+executing the student program, an input generator, and an output validator, all
+in lockstep with one another. This constitutes a range of simultaneous and
+interactive processes involved in an assessment.
 
-\subsection{Dedicated Servers}
+If the assessment happens all in a single sandboxed operating system, it seems
+infeasible to monitor, or impose limits on, e.g. the student program,
+independent of the rest. Alternatively, we could host each separate process in
+its own, sandboxed operating system. Although seemingly more useful, it adds to
+the complexity of communication between the processes of an assessment.
 
-We can provide an off-the-shelf operating system sandbox using a dedicated
-server for every program. This however, relinquishes remote control of the
-execution environment, and may demand physical access to the machine in case of
-failure. This is impractical. Also, this is expensive since most computer
-systems today are intended as time-sharing systems.
-
-\subsection{Virtual Machines}
-
-The next option is to provide an operating system by means of hardware or
-software virtualization. This retains remote control of the execution
-environment. However, it imposes huge costs on every execution. An entire
-operating system has to boot up before testing can commence.
-
-Alternatively a pool of virtual machines could be kept online, pulling tasks
-from a task queue. Such a set up does not always fail fast, again because an
-entire operating system may have to be rebooted in case of failure. Combined
-with empirical evidence that student programs fail often, this is impractical.
-
-Such high-level virtualization also makes the execution environment hard to
-monitor. The overhead of the operating system may dilute the true costs
-inherent in executing various programs. For similar reasons, fine-grained
-resource limits are often hard to enforce. All this is desirable for the
-purposes of evaluating our programs and tuning our sandboxes.
+We choose to discard sandboxing the operating system, and consider sandboxing
+within the operating system. As we shall see, this allows for fine-grained
+resource monitoring and limits, while retaining simple means of interprocess
+communication.
 
 \subsection{Operating system-level virtualization}
 
-Operating system-level virtualization alleviates the need for a separate kernel
-for sandboxing program execution environments.
+With operating system-level virtualization (OSLV), instead of running an
+operating system within a virtual environment, we create virtual environments
+within the operating system --- all sandboxes run within the same kernel.
 
 Time-sharing systems have for a long time provided for multiple simultaneous
-user space instances on top of a single kernel. Combined with file-system user
+user space instances on within a single kernel. Combined with file-system user
 permissions and user groups, these provided for the very first sandboxing
 capabilities.
 
 Recent developments in modern operating systems have facilitated more
 fine-grained sandboxing by virtualizing underlying system resources. Such a
 virtualized user space instance is typically called a ``jail'' or a
-``container''.
+``container''. Similarly, user programs are ``jailed'', or ``contained''.
 
-The pitfall of operating system-level virtualization in general, is that we
-become more vulnerable to vulnerabilities in the kernel. If a contained program
-can utilize a kernel vulnerability, the whole system is under threat.
+The pitfall of OSLV in general, is that we become more vulnerable to kernel
+vulnerabilities. If a sandboxed program can utilize a kernel vulnerability, the
+whole system is under threat.
 
 \subsubsection{FreeBSD Jails}
 
+FreeBSD's \cite{man-8-jail} is perhaps the first and most notorious (due to
+naming) implementation of OSLV. The problem is that it only runs on strictly
+FreeBSD-based operating systems, e.g. not Mac OS X. This is impractical because
+FreeBSD is less popular than Linux in general, and so a lot of software,
+perhaps necessary for assessment, may be a hurdle to maintain.
+
 \subsubsection{Linux Kernel Containment}
 
-\begin{itemize}
+The Linux kernel, has in the recent decade acquired many of the features of
+FreeBSD jails, and more. Containerisation in the Linux kernel is also done in a
+fairly extensible fashion, providing for new extensions, abstracting over new
+system resources in the future.
 
-\item LXC
+A lot of this work is inspired by OpenVZ, an OSLV technology, based on a
+modified Linux kernel. Many of their changes to the kernel have been making
+their way into the mainstream kernel\cite{kerrisk-2012}. Due to this gradual
+merge, and having more confidence in the mainstream Linux kernel, we consider
+only the containerisation options already available there.
 
-\item libvirt-lxc
+\subsubsection{LXC et al.}
 
-\item Docker
+There exist a number of userspace interfaces to the Linux kernel containment
+features. We have found all these tools lacking in some respect, and so have
+gone with setting up our own lightweight interface. Ideally, we'd probably just
+contribute some changes to e.g. the LXC project. The process has however,
+provided for a better understanding of this part of the Linux kernel.
 
-\end{itemize}
+Linux Containers (LXC) were originally developed by Daniel Lezcano (IBM) to
+ease life for kernel developers working on the kernel containerisation
+features\footnote{See also \url{https://linuxcontainers.org/}.}. To our
+knowledge, LXC is the most feature-rich, and stable userspace interface to the
+Linux kernel containment features\cite{graber-2014}.
 
+We would like for the processes of a submission to run in separate sandboxes,
+and yet be able to communicate with one another. We would like for many
+submissions to be assessable at once, and for many sandboxes to share various
+resources, such as a read-only root file system.
+
+LXC boasts pretty much all the features that we need, but we have been unable
+to set up mount points as we'd prefer. Also, LXC demands creating new, managed
+containers before code can be run in a sandbox. With our interface, sandboxes
+exist only for the lifetime of the sandboxed program, and sandboxes are
+fundamentally capable of sharing e.g. a read-only squashfs root file system.
+
+There is also a range of high-level frameworks for managing Linux containers,
+using LXC, and other drivers. For instance, libvirt-lxc\footnote{See also
+\url{http://libvirt.org/}.} and Docker\footnote{See also
+\url{https://www.docker.io/}.}. These tools seem to focus on providing a
+sandboxed userland rather than a sandboxed execution of a program. In a way,
+this stems from the general LXC approach to containers, providing for managed
+containers, rather than managed classes of containers.
+
+These frameworks, together with LXC, can prove useful when designing standard
+templates for courses. Having e.g. appropriate software already installed. We
+will not be concerned with this here.

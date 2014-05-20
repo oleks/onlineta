@@ -1,25 +1,25 @@
 % vim: set spell:
 
+\chapter{Technical Details}
+
+This appendix covers some of the technical details related to this work.
+
 % TODO: test instance
 
 \section{Control Groups}
 
-Control groups (cgroups) provide a mechanism of hierarchically
-grouping/partitioning tasks (see also
-\referToAppendix{general-linux-concepts:tasks}), and their
-children\cite{cgroups.txt}. On their own, cgroups are perhaps only useful for
-simple job tracking. The idea, is to have other subsystems hook into the
-cgroups functionality and provide for management of system resources.
-
-The standard cgroup subsystems include subsystems to monitor and limit memory,
-CPU time, I/O, and device activity. Subsystems therefore are often also called
-``resource controllers''.
+Many modern Linux distributions come with cgroups and many of these standard
+subsystems enabled. The system's \texttt{/proc/config.gz} can reveal the setup
+on your system\cite{man-5-proc}.  If \texttt{CONFIG\_CGROUPS} is enabled, you
+have cgroups support. The variables related to various subsystems are explored
+further in the following subsections.
 
 \subsection{Managing cgroups}
 
 Cgroups are managed via a pseudo-filesystem: cgroups reside in memory, but can
-be manipulated through the virtual file system.  ``cgroup'' is therefore an
-inherent file system type on systems that have cgroups enabled.
+be manipulated through the virtual file system.  \texttt{cgroup} is therefore
+an inherent file system type on systems that have the cgroups functionality
+enabled.
 
 \subsubsection{Cgroups, subsystems, and hierarchies}
 
@@ -75,25 +75,6 @@ powerset.}
 \end{figure}
 
 \subsubsection{Mounting}
-
-When mounting a cgroup file system, we create a new hierarchy. The set of
-subsystems to associate with the hierarchy is listed as mount
-options\footnote{Omitting the subsystem list, attempts to associate all
-subsystems available on the system.}:
-
-\begin{lstlisting}
-$ mount -t cgroup -o cpu,cpuacct cgroup ./cgroup/cpu,cpuacct
-\end{lstlisting}
-
-This associates the ``cpu'' and ``cpuacct'' subsystems with a new hierarchy,
-and mounts the hiearchy under the target \texttt{./cgroup/cpu,cpuacct}, unless
-one of the subsystems is busy.
-
-A subsystem is busy e.g. if it is associated with a hierarchy having tasks
-attached.  Since a hierarchy is automatically attached to all tasks on the
-system, this effectively means that a subsystem may be associated with at most
-one hierarchy. If there alrewady exists a hierarchy, assosciated with the exact
-same set of subsystems, the hierarchy will be reused for the new mount.
 
 What hierarchies already exist, and what subsystems they are associated with,
 depends on the system at hand. The system's \texttt{/proc/mounts} can reveal
