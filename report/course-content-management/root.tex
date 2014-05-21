@@ -1,0 +1,74 @@
+% vim: set spell:
+
+\chapter{Course Content Management}
+
+\label{section:infrastructure}
+
+\begin{quotation}
+
+\footnotesize\sffamily\itshape
+
+\begin{flushright}
+
+\selectlanguage{russian}
+
+Тяжело в учении, легко в бою; легко в учении, тяжело в бою.
+
+\selectlanguage{english}
+
+\smallbreak
+
+(Tough in training, easy in battle; easy in training, tough in battle.)
+
+\smallbreak
+
+\upshape
+
+--- ALEXANDER SUVOROV, Generalissimo of the Russian Empire (1729--1800)
+
+\end{flushright}
+
+\end{quotation}
+
+The intent of this chapter is to propose a course content management system
+(CCMS), allowing for interactive, automated assessment of student submissions.
+We consider this because the current CCMS in use at DIKU does not seemingly
+provide for easy hooks for student submissions, or even accessing and
+processing course data on our own account.
+
+The approach in general, is to use the Git version control system for the basic
+mechanism of content distribution. Teaching staff (and the assessment engine)
+use Git to publish learning material, assignments, and feedback, while students
+use Git to make submissions.
+
+Currently, all students and staff share one Git repository per course, but
+access to student branches on a central server, the Git server, is mandated by
+the staff. This way, student data stays personal, and at the same time,
+students can use modern revision control to collaborate on programming
+assignments.
+
+% This chapter provides a high level overview of the chosen system
+% architecture.  We justify our choices, as well as discusses some of their
+% benefits and downsides.
+
+% Overall, there are three types of servers involved: a key server, a Git
+% server, and a test server. The communications between them and the students
+% and teaching staff are roughly illustrated by \referToFigure{infrastructure}.
+% Each type of server may in reality be a set of interconnected servers
+% balancing loads among each other, but fulfilling together the role of a
+% single server type.
+
+% \includeFigure[0.75]{infrastructure}{Illustration of some of the system
+% architecture. All communication happens over secure channels. Both students
+% and staff interact with the key server and Git server, but students have
+% considerably less permissive rights on each of the servers}
+
+%\input{course-content-management/motivation}
+
+%\input{course-content-management/key-server}
+
+\input{course-content-management/git-server}
+
+\input{course-content-management/encrypted-git-repositories}
+
+% \input{course-content-management/test-server}

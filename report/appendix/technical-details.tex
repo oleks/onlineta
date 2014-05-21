@@ -131,7 +131,7 @@ process:
 
 \begin{lstlisting}
 $ sudo ls /proc/1/ns
-ipc  mnt  net  pid  uts  user
+ipc  mnt  net  pid  user uts
 \end{lstlisting}
 
 Not all namespace types supported by the Linux kernel are enabled by default in
@@ -153,3 +153,38 @@ resource limits at session set up using Pluggable Authentication Modules (PAM).
 In particular, the \cite{pam-limits} module. This module however, does not
 offer as fine-grained limits as the kernel primitives. For instance, it only allows
 to limit CPU time in terms of minutes, not seconds, as the kernel primitives.
+
+\section{Installing Gitolite}
+
+Gitolite is installed on a per-user basis. Meaning that we should create and
+log in as some designated Git user to set up gitolite, or change ownership
+accordingly after install. As an extra security assurance, the gitolite
+installation does not require a privileged user, so long as Git, OpenSSH, and
+Perl are already installed.
+
+The code is distributed under a GNU General Public License, and is available at
+\url{git://github.com/sitaramc/gitolite}. We may wish to check out the latest
+tag (version), after verifying that it indeed was signed by Sitaram Chamarty
+(the original developer of Gitolite)\footnote{See also
+\url{http://git-scm.com/book/en/Git-Basics-Tagging}, if you are unfamiliar with
+Git's tagging mechanism.}. To the best of our knowledge, his public GPG key is:
+
+\begin{lstlisting}
+pub   4096R/088237A5 2011-10-25
+      Key fingerprint =
+        560A DA64 7542 816F 412E  5891 A442 9085 0882 37A5
+uid       Sitaram Chamarty (work email) <sitaram@atc.tcs.com>
+uid       Sitaram Chamarty <sitaramc@gmail.com>
+sub   4096R/8AC76EFB 2011-10-25
+\end{lstlisting}
+
+Once cloned and compiled, gitolite setup requires the administrator's public
+SSH key to be provided in some accessible file:
+
+\begin{lstlisting}
+$ ./gitolite setup -pk admin.pub
+\end{lstlisting}
+
+This initializes a git repository \texttt{gitolite-admin.git}, which
+\texttt{admin} has complete control over. This repository serves as the primary
+administrative interface for the gitolite access control layer.

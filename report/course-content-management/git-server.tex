@@ -2,15 +2,11 @@
 
 \section{Git Server}
 
-The purpose of the Git server is to serve as a general purpose data store for
-both course content, assignments, and student submissions. It serves as a
-gateway between students and teaching staff, allowing for teaching staff to
-publish course content and assignments, and for students to make submissions.
-
+The Git server serves as a data store and gateway between students and staff.
 In the following we refer to student and staff collectively simply as clients,
 connecting to our host, the Git server. In
-\referToSection{git-server-scalability} we will discuss why we have just one
-Git server.
+\referToSection{git-server-scalability} we will discuss why we can make due
+with just one Git server.
 
 \subsection{Why Git?}
 
@@ -20,9 +16,9 @@ the ideal system for all intents and purposes, it is an excellent example that
 has cemented itself in both the open source community, academia and
 industry\cite{gitprojects-2014}.
 
-Version control and code review are some of the Core- Tier1 and Tier2 elements
-in \cite{cs-curricula-2013}. They are highly suggested topics for any
-undergraduate Computer Science programme.
+% Version control and code review are some of the Core- Tier1 and Tier2
+% elements in \cite{cs-curricula-2013}. They are highly suggested topics for
+% any undergraduate Computer Science programme.
 
 We hypothesize that using Git for programming assignments can spur the learning
 of some of the workflow of modern software development. Ideally, students
@@ -40,12 +36,12 @@ by a Git repository.
 
 A Git repository has one or more branches. We choose to let one branch - the
 master branch - be used for the distribution of course content and assignments
-by teaching staff. To make submissions, students create branches in their name
-and push their changes to these branches onto the server.
+by the teaching staff. To make submissions, students create branches in their
+name and push their changes to these branches onto the server.
 
 Assessment of a student submission is provided in a special subdirectory on
-their private branch. All assessment is bound to particular commit by the
-student to a student branch.
+their private branch, and optionally, reported to the student upon submission.
+A submission is a particular commit by the student to their branch.
 
 In such an infrastructure it is important that students are not allowed to push
 to the master branch, or to other student branches. At the same time, teaching
@@ -94,10 +90,10 @@ authorisation.
 \subsection{Git Hooks}
 
 Git hooks is a Git mechanism for executing custom scripts when important events
-happen\cite{man-5-githooks}. The scripts can control in how far certain Git
-operations succeed. A Git hook is an adequately named executables placed in a
-special subdirectory in the local Git repository. Git hooks are not part of the
-version-controlled code base.
+happen for Git repository\cite{man-5-githooks}. The scripts can control in how
+far certain Git operations should succeed. A Git hook is an adequately named
+executable placed in a special subdirectory in a local Git repository. Git
+hooks are not part of the version-controlled code base of a repository.
 
 For instance, the \texttt{update} hook is executed whenever the client attempts
 to push something to a branch. The client has already been authenticated, but
@@ -105,16 +101,19 @@ no changes have yet been made. The hook is passed adequate arguments to
 identify the branch or tag being updated and the update taking place. If this
 hook exits with a non-zero exit value, the update will duly fail.
 
+Other Git hooks are discussed in subsequent sections.
+
 \subsection{Users}
 
 When using a Git server with OpenSSH, clients must be mapped to users on the
 host. There are at least two options for the mapping: each client gets their
-own user, or all clients map to the same user. The first option has a higher
-administration costs, but gives perhaps more fine grained access control.
+own user, or all clients map to the same user.
 
-The second option is generally more popular because of less cluttering of the
-UTS namespace. Additional tools, like gitolite, are instead used to provide a
-fine-grained access control layer. We too, have chosen this option.
+The first option has higher administration costs, but gives perhaps more
+fine-grained access control. The second option is generally more popular
+because of less cluttering of the UTS namespace. Additional tools, like
+gitolite, are instead used to provide a fine-grained access control layer. We
+have also chosen to go with this option.
 
 \subsection{Gitolite}
 
@@ -135,52 +134,10 @@ There are also other tools out there, such as  Gerrit\footnote{See also
 \url{https://www.atlassian.com/software/stash}.}. Both of these provide a lot
 more than a simple access control layer.
 
-In conclusion, we chose to use gitolite ahead of both using other tools, and
-implementing our own solution.
-
-\subsubsection{Installation}
-
-Gitolite is installed on a per-user basis. Meaning that we should create and
-log in as some designated Git user to set up gitolite, or change ownership
-accordingly after install. As an extra security assurance, the gitolite
-installation does not require a privileged user, so long as Git, OpenSSH, and
-Perl are already installed.
-
-The code is distributed under a GNU General Public License, and is available at
-\url{git://github.com/sitaramc/gitolite}. We may wish to check out the latest
-tag (version), after verifying that it indeed was signed by Sitaram Chamarty
-(the original developer of Gitolite)\footnote{See also
-\url{http://git-scm.com/book/en/Git-Basics-Tagging}, if you are unfamiliar with
-Git's tagging mechanism.}. To the best of our knowledge, his public GPG key is:
-
-\begin{lstlisting}
-pub   4096R/088237A5 2011-10-25
-      Key fingerprint =
-        560A DA64 7542 816F 412E  5891 A442 9085 0882 37A5
-uid       Sitaram Chamarty (work email) <sitaram@atc.tcs.com>
-uid       Sitaram Chamarty <sitaramc@gmail.com>
-sub   4096R/8AC76EFB 2011-10-25
-\end{lstlisting}
-
-Once cloned and compiled, gitolite setup requires the administrator's public
-SSH key to be provided in some accessible file:
-
-\begin{lstlisting}
-$ ./gitolite setup -pk admin.pub
-\end{lstlisting}
-
-This initializes a git repository \texttt{gitolite-admin.git}, which
-\texttt{admin} has complete control over. This repository serves as the primary
-administrative interface for the gitolite access control layer.
-
-\begin{lstlisting}
-
-\end{lstlisting}
-
 \subsubsection{Administration}
 
-Administration of the gitolite happens through a special Git repository. There
-are three important elements to this repository:
+Administration of the gitolite happens through a special Git repository on the
+Git server. There are three important elements to this repository:
 
 \begin{enumerate}
 
@@ -202,18 +159,19 @@ complete control over the users and repositories on the Git server.
 
 \subsubsection{Permissions}
 
-Permissions in gitolite are granted on a per repository basis. Every time a
-user attempts to perform a read or write operation on a repository, the user's
-action is matched against a series of rules. If none of the rules match, the
-user operation is denied.
+User permissions in gitolite can whitelisted for an entire repository, a
+branch, tag, or even a subfolder. Users may be granted, read, write,
+read-write, and even forced write permissions (more on this in the next
+section).  There are some even more fine-grained
+permissions\cite{gitolite-com-2014e}, but we will not be concerned with them
+here.
 
-Permissions may be granted to the entire repository or just to a particular
-branch, tag, or even subfolder. Users may be granted, read, write, read-write,
-and even forced write permissions (more on this in the next section).  There
-are some even more fine grained permissions\cite{gitolite-com-2014e}, but we
-will not be concerned with them here.
+\subsection{Attack Surface}
 
-\subsection{Attack surface}
+In this section we discuss the possible ways to attempt to attack a Git server.
+This is distinct from attempting to attack our sandboxed environments in that
+the Git server is not sandboxed in any useful way. It serves as a general
+purpose data store and gateway between students and staff.
 
 \subsubsection{Login shell}
 
@@ -253,11 +211,12 @@ strict base of the update.
 Forced push is dangerous because it incautiously overwrites history and can
 thereby inhibit assessment or even modify student records.
 
-This is mitigated for by gitolite permissions. Students are simply not allowed
-to perform a forced push\footnote{As an experimental bug, teaching staff are
-still allowed to perform a forced push.}. This means that students cannot e.g.
-ammend to a commit that they have already pushed to the server. The students
-are encouraged to use \cite{man-1-git-revert} instead.
+This is mitigated for by gitolite permissions. Students and staff are simply
+not allowed to perform a forced push, supporting the notion introduced in
+\referToSection{analysis:other-notions}, that course data is never deleted.
+This means that students cannot e.g. amend to a commit that they have already
+pushed to the server. The students are encouraged to use
+\cite{man-1-git-revert} instead.
 
 \subsubsection{Git, OpenSSH, and Perl}
 
@@ -287,33 +246,30 @@ concern.
 \subsubsection{Pull requests}
 
 Our model of a student submission being a Git push to a student branch is not
-an accurate model of modern software development. In modern software
-development, a developer may work on their own branch (as our students would),
-and then make a ``pull request'' to merge their changes into the master branch.
-(Alternatively, a developer might work on in their own repository, and then
-make a pull request for their changes to be merged into the main project
-repository\cite{bird-et-al-2009}.)
+an accurate model of modern software development. Often, a developer would work
+on their own branch (as our students would), and then make a ``pull request''
+to merge their changes into the master branch\footnote{Alternatively, a
+developer might work on in their own repository, and then make a pull request
+for their changes to be merged into the main project
+repository\cite{bird-et-al-2009}.}.
 
 Such pull requests make little sense in education where all students are
 working on the same problem --- a scenario you'd often go to great lengths to
 avoid in industry. Instead, students are always allowed to submit what they
 have to their own branch. Code reviews are then done of snapshots of the
-student branch, e.g. automatically every time they push, or by a human at a
-nominal point in time.
+student branch.
 
 Alternatively, we could have chosen to have students make a pull request to a
 special ``submission branch'', with the other branch being a ``draft branch''.
-This would demand a more complicated set up of the Git server, perhaps using
-Gerrit or Stash, as mentioned above. The pull request could then be accepted
-if the code passed automatic code review.
+(This would demand a more complicated access control layer.) The pull request
+could then be accepted if the code passed automatic code review.
 
 Unfortunately, it is sometimes instructional to give credit for an attempt at
 solving the problem. There may even come a situation where the student has made
 it to submit some basic working code in the submission branch but has a more
-comprehensive (non-working) solution in their draft branch. It would seem that
-this would gravely complicate matters for the subsequent human code review. In
-our model, the commit and test history of a branch is sufficient to reveal when
-the code had last worked.
+comprehensive (non-working) solution in their draft branch. In our model, the
+commit and assessment history of a branch is sufficient to reveal when the code
+had last worked.
 
 \subsubsection{Responding to students}
 
@@ -374,8 +330,7 @@ operations in a separate user session.
 
 To our knowledge, there are no practical limits on the number of simultaneous
 connections to a Linux server. The number of user sessions however, is bound by
-the maximum number of processes per user. (Later, we will use this feature to
-guard against fork bombs.) This limit can be found using:
+the maximum number of processes per user. This limit can be found using:
 
 \begin{lstlisting}
 $ ulimit -u
