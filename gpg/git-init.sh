@@ -1,24 +1,30 @@
 #!/usr/bin/env bash
 
-mkdir -p "$1"
-cd "$1"
-git init
+# Create a Git repository that encrypts and signs all the data before it
+# commits and decrypts and verifies at a checkout.
 
-cat >"./.git/info/attributes" <<EOF
+# Usage: ./git-init.sh <name> [<keys>]
+# Example: ./git-init.sh crypto 43FFA757 B7FFF4BD
+
+# If no keys are specified, the default (set for gpg2) is used.
+# The default gpg2 key is always used for signing.
+
+DIR=$1
+KEYS="${@:2}"
+
+if [ -n "$KEYS" ]; then
+  RECIPIENTS=$(echo "$KEYS" | sed -E 's/(^| )/ -r /g')
+fi
+
+git init --quiet "$DIR" || exit 1
+
+cat >"$DIR/.git/info/attributes" <<EOF
 * filter=crypt
 EOF
 
-cat >>"./.git/config" <<EOF
+cat >>"$DIR/.git/config" <<EOF
 [filter "crypt"]
-	clean = "/usr/bin/env bash -c 'tee \\
-		>(gpg -ear 26934BE1 2>&1 | tr \\"\\\\n\\" \\"$\\" | sed \\"s/\\\\\$\$/\\\\n/\\") \\
-		>(gpg -ear 5496F89F 2>&1 | tr \\"\\\\n\\" \\"$\\" | sed \\"s/\\\\\$\$/\\\\n/\\") \\
-		1>/dev/null | gpg -qs --batch'"
-	smudge = "/usr/bin/env bash -c 'gpg -qd --batch | \\
-		while read line; \\
-		do echo \\"\$line\\" | tr \\"$\\" \\"\\n\\" | \\
-			gpg -qd --batch && OK=1 && break; \\
-		done; \\
-		if [ -z OK ]; then exit 1; fi'"
+	clean = "gpg2 --encrypt --sign --quiet$RECIPIENTS"
+	smudge = "gpg2 --decrypt --quiet"
 	required
 EOF
