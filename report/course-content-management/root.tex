@@ -36,10 +36,15 @@ We consider this because the current CCMS in use at DIKU does not seemingly
 provide for easy hooks for student submissions, or even accessing and
 processing course data on our own account.
 
-The approach in general, is to use the Git version control system for the basic
+Our approach in general, is to use the Git version control system for the basic
 mechanism of content distribution. Teaching staff (and the assessment engine)
-use Git to publish learning material, assignments, and feedback, while students
-use Git to make submissions.
+use Git to publish learning material, assignments, and feedback. Students use
+Git to make submissions, and ultimately, collaborate on submissions.
+
+Student data is encrypted and signed by the students. Access to the student
+data is mandated through an additional access control layer. This way we can
+ensure that student submissions indeed come from the students, and even if our
+access control layer fails to deliver, student data stays protected.
 
 % This chapter provides a high level overview of the chosen system
 % architecture.  We justify our choices, as well as discusses some of their
@@ -63,6 +68,18 @@ use Git to make submissions.
 
 \input{course-content-management/git-server}
 
+\input{course-content-management/openssh}
+
+\input{course-content-management/git-hooks}
+
+\input{course-content-management/users}
+
+\input{course-content-management/gitolite}
+
 \input{course-content-management/encrypted-git-repositories}
+
+\input{course-content-management/attack-surface}
+
+\input{course-content-management/discussion}
 
 % \input{course-content-management/test-server}

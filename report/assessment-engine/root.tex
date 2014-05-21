@@ -2,6 +2,8 @@
 
 \chapter{Assessment Engine}
 
+\label{section:assessment-engine}
+
 \begin{quotation}
 
 \footnotesize\sffamily\itshape
@@ -37,6 +39,9 @@ a reference solution: which files, libraries does it need, how much memory and
 CPU time does it need, etc. This data is then used to create a conservative
 sandbox for running the processes of an assessment.
 
+\textbf{Remark}: Due to time constraints, I have not been able to complete this
+chapter. This chapter should be read as notes, rather than a fine-grained text.
+
 \section{Monitoring}
 
 Control groups, as discussed in \referToSection{sandboxing:control-groups}, can
@@ -44,4 +49,56 @@ be used to measure the memory, and CPU time of processes. \cite{man-1-time}
 user space utility can be used to measure wall-clock time.
 
 A bit more cumbersome is figuring out what files are needed in the root file
-system for a process to complete successfully.
+system for a process to complete successfully. Some files are necessitated by
+the assignment itself. Sometimes, it will also suffice to execute statically
+linked programs. All this is easy enough.
+
+The complication comes for executables that make use of other programs for
+their execution (e.g. shell scripts) dynamically linked executables. We can
+figure out the files that are opened throughout the execution of a program
+using \texttt{strace(1)}.
+
+For a dynamically-linked ELF executable, we can inspect it using
+\texttt{mreadelf(1)}. Here, we are looking for interpreter it is requesting,
+which will dynamically link the relevant library. Next, we look for the shared
+libraries that it requests. Including the interpreter and the related shared
+libraries in the root file system is sufficient to run a dynamically linked
+executable within that root file system.
+
+\section{Sharing a file system between a host and a container}.
+
+One way to share data between the host and a Linux container is using a shared
+in-memory file system. We sketch the algorithm for this using the techniques we
+discussed in the previous chapter.
+
+\begin{enumerate}
+
+\item Mount a temporary in-memory file system under a target \texttt{./output},
+e.g. of maximum size 1 megabyte.
+
+\item Enter a new mount namespace.
+
+\item Make sure that original root marks all mount points as private.
+
+\item Mount the new root as a readonly in-memory slave under a target
+\texttt{./readonly}, e.g. using a \texttt{squashfs} file system type for extra
+``read-onlyness''.
+
+\item Bind mount \texttt{./output} under \texttt{./readonly/output}.
+
+\item Pivot root to the new root.
+
+\item Unmount all but the new root and the output directory.
+
+\item Drop privileges.
+
+\item Run the contained program. (Exit the mount namespace.)
+
+\item Clean up, and save the data in \texttt{./output}, if necessary.
+
+\end{enumerate}
+
+This way, the host provides a safe scratchspace for the container. Both the
+host and the container have read and write access to this scratchspace.  Yet,
+the container needs no access to any underlying block device. If the data a
+container produces should be retained, we do this in the last step.
