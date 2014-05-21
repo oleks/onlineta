@@ -26,9 +26,22 @@ static and dynamic analyses, as well as a feedback processing step.
 
 In general, we refer to these steps as the processes of an assessment. The
 processes of an assessment, each run their own sandbox and communicate with
-other processes using standard in/out, at most, files in an in-memory file
-system. 
+other processes using standard in/out, and perhaps an in-memory file system. 
 
 The combination of these sandboxed processes forms an assessment engine, taking
 the student submission in at one end, and producing ``student-friendly''
 feedback at the other.
+
+The general approach to designing these processes is intended to be to monitor
+a reference solution: which files, libraries does it need, how much memory and
+CPU time does it need, etc. This data is then used to create a conservative
+sandbox for running the processes of an assessment.
+
+\section{Monitoring}
+
+Control groups, as discussed in \referToSection{sandboxing:control-groups}, can
+be used to measure the memory, and CPU time of processes. \cite{man-1-time}
+user space utility can be used to measure wall-clock time.
+
+A bit more cumbersome is figuring out what files are needed in the root file
+system for a process to complete successfully.

@@ -3,6 +3,13 @@
 \section{Git Server}
 
 The Git server serves as a data store and gateway between students and staff.
+
+Currently, all students and staff share one Git repository per course, but
+access to student branches on a central server, the Git server, is mandated by
+the staff. This way, student data stays personal, and at the same time,
+students can use modern revision control to collaborate on programming
+assignments.
+
 In the following we refer to student and staff collectively simply as clients,
 connecting to our host, the Git server. In
 \referToSection{git-server-scalability} we will discuss why we can make due
@@ -177,7 +184,8 @@ purpose data store and gateway between students and staff.
 
 It is often important with Git servers to disallow clients' shell requests.
 This is typically achieved by setting the user's login shell to something
-non-permissive, e.g. a \cite{man-1-git-shell}.
+non-permissive, e.g. a \cite{man-1-git-shell}, and disabling login for that
+user in general.
 
 This set up is perhaps a bit superfluous, as gitolite disables interactive
 shell login via the authorized keys file. Never-the-less it is a good extra

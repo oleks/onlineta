@@ -1,0 +1,42 @@
+% vim: set spell:
+
+\chapter{Discussion}
+
+For the purposes of discussion, we've created an Open Virtualization Appliance
+(OVA) using VirtualBox, running Ubuntu 14.04, the server edition. We chose
+Ubuntu, because it comes with user namespaces enabled by default (see also
+\referToSection{sandboxing:namespaces:user}). The OVA is intended to
+demonstrate some of the techniques discussed above.
+
+We've created a couple mirrors for the distribution of the OVA:
+
+\begin{itemize}
+
+\item TODO
+
+\end{itemize}
+
+The SHA-512 sum of the OVA file is: TODO.
+
+We'll be using 4 system users: \texttt{onlineta} --- the system administrator,
+\texttt{git} --- the Git user, and \texttt{mikkel} and \texttt{niels} ---
+students. For each user, their login password, OpenSSH, and GnuPG password is
+their username.
+
+We'll abuse the system administrator account for the tasks of the teaching
+staff, and the Git user for running assessments. Ideally, each of these would
+have their own dedicated users. In a real setting, students would not need to
+have users on the system either. We do this for the purposes of a simple
+demonstration.
+
+You should be able to log into the OVA using SSH, once booted on your host.
+For instance,
+
+\begin{lstlisting}
+$ ssh -p 2222 onlineta@127.0.0.1
+\end{lstlisting}
+
+If not, you may need to set up port forwarding in your OVA client. In the case
+above, we forward host port 2222 to guest port 22.
+
+\input{discussion/future-work}
