@@ -1,7 +1,7 @@
 #define _GNU_SOURCE // necessary to get CLONE_*
 #include <sys/types.h> // pid_t
 #include <sys/wait.h> // waitpid
-#include <stdlib.h> // exit
+#include <stdlib.h> // exit, EXIT_*
 #include <stdio.h> // perror
 #include <unistd.h> // clone
 #include <sched.h> // CLONE_*
