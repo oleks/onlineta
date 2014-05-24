@@ -44,7 +44,6 @@ try_unmount_oldroot()
     if (strncmp(mntent->mnt_dir, "/.oldroot", 9) == 0)
     {
       found = 1;
-      printf("%s\n", mntent->mnt_dir);
       try_unmount_mnt_dir(mntent->mnt_dir);
     }
   }
@@ -59,6 +58,12 @@ unmount_oldroot()
   int depth = 20;
   while (try_unmount_oldroot() && (depth--)); // Oh my!
   // This is probably as fast as anything else in practice anyhow..
+
+  if (depth == 0)
+  {
+    perror("couldn't unmount old root");
+    exit(EXIT_FAILURE);
+  }
   return 0;
 }
 
