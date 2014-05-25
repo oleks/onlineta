@@ -9,26 +9,13 @@
 #include <fcntl.h> // O_*
 #include <semaphore.h> // sem_*
 
-static sem_t *MAPPING;
-
-static int
-exec(void *arg)
-{
-  arg = arg;
-//  char **argv = (char **)arg;
-  sem_wait(MAPPING);
-  sem_close(MAPPING);
-  printf("%d\n", getuid());
-  return 0;
-  //execv(argv[0], argv);
-  //perror("exec");
-  //exit(EXIT_FAILURE);
-}
-
 #define STACK_SIZE (1024 * 1024)
 
 static char
 stack[STACK_SIZE];
+
+static sem_t *
+MAPPING;
 
 static int
 chdir_to_uid_map(pid_t pid)
@@ -86,6 +73,21 @@ uid_map()
   }
 
   return 0;
+}
+
+static int
+exec(void *arg)
+{
+  arg = arg;
+  char **argv = (char **)arg;
+
+  // Wait for the mapping to finish.
+  sem_wait(MAPPING);
+  sem_close(MAPPING);
+
+  execv(argv[0], argv);
+  perror("exec");
+  exit(EXIT_FAILURE);
 }
 
 int
