@@ -6,3 +6,8 @@
 signal once a program exceeds a wall-clock time limit, e.g. \texttt{SIGTERM} or
 \texttt{SIGKILL}. The applicability of this has already been discussed in
 \referToSection{sandboxing:resource-limits}.
+
+Unfortunately, as we had realised too late, using \cite{man-1-timeout} skews
+CPU time measurements. The process and its children are frequently interrupted
+to check if they haven't exceeded the wall-clock time limit (see also
+\referToSection{discussion}).

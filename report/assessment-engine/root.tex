@@ -10,13 +10,33 @@
 
 \begin{flushright}
 
-/* War is peace. Verbosity is silence. MS\_VERBOSE is deprecated. */
+This is the Unix philosophy: Write programs that do one thing and do it well.
+Write programs to work together. Write programs to handle text streams, because
+that is a universal interface.
 
 \smallbreak
 
 \upshape
 
---- DAVID HOWELLS, Linux Source Code (2012)
+--- Doug Mcllroy (1994)
+
+\end{flushright}
+
+\end{quotation}
+
+\begin{quotation}
+
+\footnotesize\sffamily\itshape
+
+\begin{flushright}
+
+Some of the more obscure uses of \texttt{pivot\_root()} may quickly lead to insanity.
+
+\smallbreak
+
+\upshape
+
+--- \texttt{pivot\_root(2)} (2012)
 
 \end{flushright}
 
@@ -26,12 +46,11 @@ When a student makes a submission, it needs to be assessed. The
 assessment is specified by the teaching staff, and may consist of a range of
 static and dynamic analyses, as well as a feedback processing step.
 
-In general, we refer to these steps as the processes of an assessment. The
-processes of an assessment, each run their own sandbox and communicate with
-other processes using standard in/out, and perhaps an in-memory file system. 
-
-The combination of these sandboxed processes forms an assessment engine, taking
-the student submission in at one end, and producing ``student-friendly''
+In general, we refer to these steps as the \emph{processes} of an assessment.
+The processes of an assessment, each run their own sandbox and communicate with
+other processes using standard in/out, and perhaps an in-memory file system.
+The combination of these sandboxed processes forms an \emph{assessment engine},
+taking the student submission in at one end, and producing ``student-friendly''
 feedback at the other.
 
 The general approach to designing these processes is intended to be to monitor
@@ -39,8 +58,69 @@ a reference solution: which files, libraries does it need, how much memory and
 CPU time does it need, etc. This data is then used to create a conservative
 sandbox for running the processes of an assessment.
 
-\textbf{Remark}: Due to time constraints, I have not been able to complete this
-chapter. This chapter should be read as notes, rather than a fine-grained text.
+\section{Sandboxes and Chaining}
+
+We follow the Unix philosophy\cite{salus-1994} in our sandboxing approach, i.e.
+we write programs that do one thing and (eventually) do it well. More
+sophisticated sandboxes are achieved by chaining together simple sandboxing
+programs. A simple sandboxing program puts itself into a simple sandbox and
+executes (or forks and executes) the next program on its argument list.
+
+This keeps the individual sandboxing quirks to the individual programs, and
+allows for an easy composition of sandboxes into sophisticated sandboxed
+environments. Unlike LXC, and other tools we've seen, it also gives us full
+control of the order in which a sandbox is constructed.
+
+Some of our simple sandboxing programs are summarised below:
+
+\begin{description}[\setleftmargin{0.2in}\breaklabel\setlabelstyle{\tt}]
+
+\item [cgroups] Attach the process to a set of cgroups. The cgroup
+\texttt{tasks} files (where to append the pid) are passed as options to the
+program.
+
+\item [mnt] Enter a new mount namespace.
+
+\item [user] Enter a new user namespace. The current user is mapped to uid 0
+within the container.
+
+\item [minpuf] Enter a new (m)ount, (i)pc, (n)et, (p)id, (u)ts, and (f)s
+namespace.
+
+\item [mount-rootfs] Set up a root file system. By default, the subfolder
+\texttt{rootfs} is assumed to contain the new root file system, and
+\texttt{rootfs-target} is assumed to be the target for the mount.
+
+\item [pivot-root] Pivot the root file system. By default, it is assumed that
+the new root is under \texttt{root}, and the old root can be placed under
+\texttt{rootfs/.oldroot}.
+
+\item [umount-oldroot] Unmount the old root file system. By default, assumed to
+be under \texttt{/.oldroot}.
+
+\item [setuid] Set the user id. By default, to 1000.
+
+\item [rlimits] Set resource limits. By default, set core file size to 0, the
+maximum number of processes to 20, and the maximum CPU time to 1 second.
+
+\end{description}
+
+We can chain these together to form sophisticated sandboxes. For instance, let
+\texttt{rootfs} be a subfolder in the current working directory, containing an
+executable \texttt{rootfs/home/student/program} (more on the necessity of
+\texttt{sudo} later):
+
+\begin{lstlisting}
+$ sudo ./minpuf ./mount-rootfs ./pivot-root /home/student/program
+\end{lstlisting}
+
+The keen reader might notice that e.g. \texttt{setuid} and \texttt{pivot-root}
+already have Linux user space equivalents. We reimplement these to fit our
+chaining approach. We leave it to future work to not reimplement existing
+simple sandboxing programs, or patch these programs to suit our needs.
+
+\textbf{Remark}: Under the current implementation, the default is typically the
+only option for the above programs.
 
 \section{Monitoring}
 
