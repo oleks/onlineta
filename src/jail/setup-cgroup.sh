@@ -27,3 +27,4 @@ setup_cgroup()
 
 setup_cgroup "memory"
 setup_cgroup "cpu,cpuacct"
+setup_cgroup "devices"

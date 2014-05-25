@@ -17,6 +17,7 @@ teardown_cgroup()
   fi
 }
 
+teardown_cgroup "devices"
 teardown_cgroup "cpu,cpuacct"
 teardown_cgroup "memory"
 
