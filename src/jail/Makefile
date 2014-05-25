@@ -3,9 +3,9 @@ CFLAGS=-Wall -Wextra -pedantic -std=gnu11
 LDFLAGS=
 
 all:
-	mkdir -p "root/home/student"
-	mkdir -p "root/bin"
-	mkdir -p "root/.oldroot"
+	mkdir -p "rootfs/home/student"
+	mkdir -p "rootfs/bin"
+	mkdir -p "rootfs/.oldroot"
 	mkdir -p "rootfs-target"
 	mkdir -p "tmpfs-target"
 	mkdir -p "input"
@@ -17,6 +17,6 @@ all:
 	$(CC) $(CFLAGS) $(LDFLAGS) -o minpuf minpuf.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -o mount-rootfs mount-rootfs.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -o pivot-root pivot-root.c
-	$(CC) $(CFLAGS) $(LDFLAGS) -o root/bin/.umount-oldroot umount-oldroot.c
-	$(CC) $(CFLAGS) $(LDFLAGS) -o root/bin/.setuid setuid.c
-	$(CC) $(CFLAGS) $(LDFLAGS) -o root/bin/.rlimits rlimits.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -o rootfs/bin/.umount-oldroot umount-oldroot.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -o rootfs/bin/.setuid setuid.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -o rootfs/bin/.rlimits rlimits.c
