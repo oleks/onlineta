@@ -9,13 +9,14 @@ fi
 # Arguments #
 #############
 
-while getopts "w:m:t:" arg
+while getopts "m:t:w:" arg
 do
   case $arg in
-  w)  LIMIT_WALL_CLOCK="$OPTARG";;
   m)  LIMIT_MEMORY="$OPTARG";;
-  t)  LIMIT_CPU_TIME="$OPTARG";;
-  ?)  echo "Usage: ./monitor.sh"
+  t)  LIMIT_CPU_TIME="-t $OPTARG";;
+  w)  LIMIT_WALL_CLOCK="timeout $OPTARG";;
+      # OBS! timeout(1) skews CPU time measurements.
+  ?)  echo "Usage: ./$0"
       echo "  [-w <timeout>]"
       echo "  [-m <memlimit-in-bytes>]"
       echo "  [-t <cpu-time-limit-in-seconds>]"
@@ -47,16 +48,7 @@ TIME_FILE=$(mktemp "tmp.onlineta.XXXXXXXXXXXX")
 # Run #
 #######
 
-# OBS! timeout(1) skews CPU time measurements.
-if [ -n "$LIMIT_WALL_CLOCK" ]; then
-  TIMEOUT="timeout ""$LIMIT_WALL_CLOCK"
-fi
-
-if [ -n "$LIMIT_CPU_TIME" ]; then
-  CPUTIME=-t "$LIMIT_CPU_TIME"
-fi
-
-$TIMEOUT time -p --output="$TIME_FILE" ./priv-test.sh $CPUTIME
+$LIMIT_WALL_CLOCK time -p --output="$TIME_FILE" ./priv-test.sh $LIMIT_CPU_TIME
 
 ##########
 # Report #
