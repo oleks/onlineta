@@ -1,33 +1,53 @@
 #!/usr/bin/env sh
 
-if [ $(id -u) != 0 ]; then
-  echo "$0 must be run as root."
-  exit 1
-fi
+ROOTFS=bind
 
 #############
 # Arguments #
 #############
 
-while getopts "m:t:w:" arg
+usage()
+{
+  echo "Usage: sudo $0"
+  echo "  [-w <timeout-in-seconds>]"
+  echo "  [-m <memlimit-in-bytes>]"
+  echo "  [-t <cpu-time-limit-in-seconds>]"
+  echo "  [-s] (use squashfs for the rootfs)"
+  echo "  <executable-on-rootfs>"
+}
+
+while getopts "m:t:w:sh" arg
 do
   case $arg in
   m)  LIMIT_MEMORY="$OPTARG";;
   t)  LIMIT_CPU_TIME="-t $OPTARG";;
-  w)  LIMIT_WALL_CLOCK="timeout $OPTARG";;
+  w)  LIMIT_WALL_CLOCK="timeout ${OPTARG}s";;
       # OBS! timeout(1) skews CPU time measurements.
-  ?)  echo "Usage: ./$0"
-      echo "  [-w <timeout>]"
-      echo "  [-m <memlimit-in-bytes>]"
-      echo "  [-t <cpu-time-limit-in-seconds>]"
+  s)  ROOTFS=squashfs;;
+  h)  usage
+      exit 0
+      ;;
+  ?)  usage
       exit 1
       ;;
   esac
 done
 
+shift $((OPTIND -1))
+
+if [ $# -eq 0 ]; then
+  usage
+  exit 1
+fi
+
 #########
 # Setup #
 #########
+
+if [ $(id -u) != 0 ]; then
+  echo "$0 must be run as root."
+  exit 1
+fi
 
 ./setup-cgroups.sh || exit 1
 
@@ -48,7 +68,21 @@ TIME_FILE=$(mktemp "tmp.onlineta.XXXXXXXXXXXX")
 # Run #
 #######
 
-$LIMIT_WALL_CLOCK time -p --output="$TIME_FILE" ./test.sh $LIMIT_CPU_TIME || exit 1
+$LIMIT_WALL_CLOCK \
+  /usr/bin/time -p --output="$TIME_FILE" \
+  ./mnt \
+  ./sh-rootfs-$ROOTFS \
+  ./sh-iofs \
+  ./pumin \
+  ./cgroups \
+    -g ./cgroups-target/memory/onlineta/tasks \
+    -g ./cgroups-target/cpu,cpuacct/onlineta/tasks \
+    -g ./cgroups-target/devices/onlineta/tasks \
+  ./pivot-root \
+  /.bin/umount-oldroot \
+  /.bin/setuid \
+  /.bin/rlimits $LIMIT_CPU_TIME \
+  $@
 
 ##########
 # Report #
