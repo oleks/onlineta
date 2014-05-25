@@ -1,10 +1,5 @@
 #!/usr/bin/env sh
 
-if [ $(id -u) != 0 ]; then
-  echo "$0 must be run as root."
-  exit 1
-fi
-
 #############
 # Arguments #
 #############
@@ -32,14 +27,14 @@ cp -r "input/"* "tmpfs-target/" || exit 1
 #######
 
 ./mnt \
-  ./rootfs \
+  ./mount-rootfs \
   ./minpuf \
   ./cgroups \
     -g ./cgroups-target/memory/onlineta/tasks \
     -g ./cgroups-target/cpu,cpuacct/onlineta/tasks \
     -g ./cgroups-target/devices/onlineta/tasks \
   ./pivot-root \
-  /bin/.unmount-oldroot \
+  /bin/.umount-oldroot \
   /bin/.setuid \
   /bin/.rlimits $LIMIT_CPU_TIME \
   /home/student/hej
@@ -48,6 +43,6 @@ cp -r "input/"* "tmpfs-target/" || exit 1
 # Teardown #
 ############
 
-rm -rf "output/"*
-cp -r "tmpfs-target/"* "output/"
-umount "tmpfs-target"
+rm -rf "output/"* || exit 1
+cp -r "tmpfs-target/"* "output/" || exit 1
+umount "tmpfs-target" || exit 1
