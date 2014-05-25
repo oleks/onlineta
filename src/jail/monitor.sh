@@ -48,7 +48,7 @@ TIME_FILE=$(mktemp "tmp.onlineta.XXXXXXXXXXXX")
 # Run #
 #######
 
-$LIMIT_WALL_CLOCK time -p --output="$TIME_FILE" ./priv-test.sh $LIMIT_CPU_TIME || exit 1
+$LIMIT_WALL_CLOCK time -p --output="$TIME_FILE" ./test.sh $LIMIT_CPU_TIME || exit 1
 
 ##########
 # Report #

@@ -12,7 +12,7 @@ all:
 	mkdir -p "output"
 	$(CC) $(CFLAGS) $(LDFLAGS) -o input/hej hej.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -o cgroups cgroups.c
-	$(CC) $(CFLAGS) $(LDFLAGS) -pthread -o userns userns.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -pthread -o user user.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -o mnt mnt.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -o minpuf minpuf.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -o rootfs rootfs.c
