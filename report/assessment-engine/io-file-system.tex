@@ -1,0 +1,21 @@
+% vim: set spell:
+
+\section{I/O File System}
+
+One way to share data between the host and a Linux container is using a shared
+in-memory file system.
+
+Once we've mounted a root file system (but before we pivot the root), we can
+mount a \texttt{tmpfs} under the current (old) root, and bind mount it under
+what will be the new root. Entering a new mount namespace, and pivoting the
+root moves all dependencies on the old root to the new root, and so the bind
+mound becomes a \texttt{tmpfs} mount inside the container, after the root is
+pivoted.
+
+Of course, nothing happens to the mount outside the mount namespace, and the
+seemingly two \texttt{tmpfs} mounts indeed point to the same temporary file
+system. This way, we can share a file system between a host and container
+without giving access to a block device.
+
+(See also the attached \texttt{./src/jail/sh-iofs} and
+\texttt{./src/jail/monitor}.)

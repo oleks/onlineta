@@ -1,0 +1,54 @@
+% vim: set spell:
+
+\section{Root File System}
+
+We prefer a bare bones root file system providing little more than exactly what
+is needed to execute our programs. It can be a bit challenging to assemble such
+root file systems.
+
+We assemble a root file system by copying everything that we need under e.g. a
+\texttt{rootfs} subdirectory. For instance, in the attached source code, and
+for the referenced virtual machine, we have assembled:
+
+\begin{description}[\setleftmargin{0.2in}\breaklabel\setlabelstyle{\tt}]
+
+\item [rootfs/lib64/ld-linux-x86-64.so.2] A dynamic linker for 64-bit executables on Ubuntu.
+
+\item [rootfs/lib/x86\_64-linux-gnu/libc.so.6] \texttt{glibc} for dynamic linking.
+
+\item [rootfs/.oldroot] Directory for the old root.
+
+\item [rootfs/home/student] Directory for I/O file system.
+
+\end{description}
+
+With this root file system, we can execute any standard dynamically-linked
+64-bit ELF executable built on our system.
+
+We can figure out which dynamic linker a dynamically-linked ELF executable
+needs using \texttt{readelf(1)}\footnote{Look for ``Required interpreter''.}.
+Similarly, we can figure out some of the shared libraries that the executable
+needs\footnote{Look for ``Shared library''.}. However, once we've included the
+necessary dynamic linker, it will report if a shared library is missing. This
+way, we can assemble the necessary shared libraries using a fixed-point
+iteration.
+
+Our programs may also use shell scripts, or require other obscure elements of
+the file system. To this end, we can use \texttt{strace(1)} (with the
+\texttt{-f} option) on our program to figure out what sort of files it is
+looking for and failing to find.
+
+\subsection{SquashFS}
+
+SquashFS is a compressed read-only file system for Linux\footnote{See also
+\url{http://squashfs.sourceforge.net/}.}. In principle, it can serve as a file
+system type for read-only root file systems for our containers.  Being
+read-only by design, this may provide some extra confidence that the root file
+system will remain read-only.
+
+SquashFS does come with a couple quirks. A SquashFS is a file which can be
+mounted as a loopback device. The Linux kernel puts a bound on the number of
+loopback devices. This bound can be increased.  Also, being mounted as a
+loopback device means that we can't blindly deny access to all devices.
+Luckily, loopback devices (and virtual character devices) always have the major
+device number 7\cite{devices.txt-b}.

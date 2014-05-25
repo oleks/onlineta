@@ -1,0 +1,39 @@
+% vim: set spell:
+
+\section{Pivot Root}
+
+One particularly useful application of mount namespaces (see also
+\referToSection{namespaces:mnt}) is pivoting the file system root to some other
+point in the file system using \cite{man-2-pivot-root}. Pivoting the root in a
+container does not affect the host, or other containers. At the same time,
+pivoting the root moves all the dependencies on the old root, to the new root,
+within the container.
+
+This allows us to subsequently unmount the old root, provided that the old root
+is not busy. So \cite{man-2-pivot-root} can be used to hide the original root
+file system in a matter similar to \cite{man-2-chroot}, but makes
+reestablishing the old root slightly more cumbersome, since the old root has to
+be properly remounted first. By mounting the new root in a \texttt{tmpfs}, or
+perhaps even \texttt{squashfs}, we can subsequently deny access to all block
+devices within the container (see also
+\referToSection{control-groups:devices}). This makes remounting the old root
+all the more cumbersome.
+
+\subsection{Unmount vs. Detach Old Root}
+
+The old root is busy if there are mounts to targets under the old root, or the
+running process depends on the old root.  By closing all open files, switching
+to a process originating from under the new root, and unmounting all mounts
+under the old root, we can get to unmount the old root.
+
+However, unmount requires root privileges on the host. The approach above
+therefore requires that we pivot the root while still having root privileges on
+the host. We have not solved the problem of entering a user namespace after
+pivoting the root to some bare bones root file system. This is bad because it
+essentially renders user namespaces inapplicable in our case.
+
+The other approach is to detach everything under the old root, meaning that it
+will be unmounted when the old root is no longer busy. We can then take a leap
+of faith that the old root will indeed be detached when we switch to a process
+under the new root (rendering the old root not busy). We have not had time to
+implement this.
