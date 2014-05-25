@@ -2,19 +2,24 @@
 
 \section{Root File System}
 
+\label{section:assessment-engine:root-file-system}
+
 We prefer a bare bones root file system providing little more than exactly what
 is needed to execute our programs. It can be a bit challenging to assemble such
 root file systems.
 
 We assemble a root file system by copying everything that we need under e.g. a
 \texttt{rootfs} subdirectory. For instance, in the attached source code, and
-for the referenced virtual machine, we have assembled:
+for the referenced virtual machine (see also \referToSection{discussion}), we
+have assembled:
 
 \begin{description}[\setleftmargin{0.2in}\breaklabel\setlabelstyle{\tt}]
 
-\item [rootfs/lib64/ld-linux-x86-64.so.2] A dynamic linker for 64-bit executables on Ubuntu.
+\item [rootfs/lib64/ld-linux-x86-64.so.2] A dynamic linker for 64-bit
+executables on e.g. Ubuntu.
 
-\item [rootfs/lib/x86\_64-linux-gnu/libc.so.6] \texttt{glibc} for dynamic linking.
+\item [rootfs/lib/x86\_64-linux-gnu/libc.so.6] \texttt{glibc} for dynamic
+linking on e.g. Ubuntu.
 
 \item [rootfs/.oldroot] Directory for the old root.
 

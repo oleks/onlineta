@@ -2,6 +2,8 @@
 
 \section{Monitoring and Limits}
 
+\label{section:assessment-engine:monitoring-and-limits}
+
 In general, we would like to monitor the execution of our programs. For
 instance, we may monitor a reference solution to an assignment, so as to arrive
 at sound limits on submissions for that assignment. Monitoring a submission may
@@ -14,8 +16,8 @@ and memory.  The program also has the option of using either a bind-mounted or
 a SquashFS root file system.
 
 \begin{lstlisting}
-$ sudo ./monitor -h
-Usage: ./monitor
+$ ./monitor -h
+Usage: sudo ./monitor
   [-w <timeout>]
   [-m <memlimit-in-bytes>]
   [-t <cpu-time-limit-in-seconds>]
@@ -39,8 +41,8 @@ These results come from putting the program into a memory, and cpuacct
 namespace, as well as making the \cite{man-1-time} Linux user space program
 part of our program chain.
 
-You can experiment with this on the referenced virtual machine, or browse the
-code under the attached \texttt{./src/jail/monitor}. The results of applying
-various optional limits are also discussed in \referToSection{discussion}. In
-the following sections we discuss some of the more interesting aspects of our
-sandboxes and monitoring.
+You can experiment with this on the referenced virtual machine (see also
+\referToSection{discussion}), or browse the code under the attached
+\texttt{./src/jail/monitor}. The results of applying various optional limits
+are also discussed in \referToSection{discussion}. In the following sections we
+discuss some of the more interesting aspects of our sandboxes and monitoring.

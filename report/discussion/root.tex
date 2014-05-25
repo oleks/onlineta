@@ -22,22 +22,32 @@
 
 \end{quotation}
 
-% We've sketched some aspects of a system that may serve as a framework for
-% performing automated assessment of practical work in computer programming
-% courses. We've discussed many technologies that we can use both to provide
-% sandboxed execution environments, as well as a safe and secure course
-% management system. The techniques discussed provide for lightweight system,
-% capable of guaranteeing a high level of safety, security and fairness in
-% performing assessments and managing course data.
+We've sketched some aspects of a system that may serve as a framework for
+performing automated assessment of practical work in computer programming
+courses. We've discussed many technologies that we can use both to provide
+sandboxed execution environments, as well as a safe and secure course
+management system. The techniques discussed provide for lightweight system,
+capable of guaranteeing a high level of safety, security and fairness in
+performing assessments and managing course data.
 
-% Unfortunately, due to time constraints, the techniques described have only
-% been tried out in a scratchbook fashion. They have not been all compiled into
-% a system that is ready for demonstration at the time of writing.
+We've also implemented some basic sandboxing capabilities that can be chained
+together to form more complicated sandboxes. Notably, we can communicate with
+our sandboxed programs using standard in, out, the file system, and even trace
+them with e.g. \texttt{strace(1)}.
 
-For the purposes of discussion, we've created an Open Virtualization Appliance
-(OVA) using VirtualBox, running Ubuntu 14.04, the server edition. We chose
-Ubuntu, because it comes with user namespaces enabled by default (see also
-\referToSection{sandboxing:namespaces:user}). The OVA is intended to
+Unfortunately, due to time constraints, the techniques described have only been
+tried out in a scratchbook fashion. They have not been all compiled into a
+system that is ready for any course at the time of writing. In particular, an
+infrastructure for static and dynamic analyses, as well as feedback processing
+is missing. Never-the-less we believe that this will be easy to assemble given
+the work done here.
+
+\section{Virtual Machine}
+
+For the purposes of some discussion, we've created an Open Virtualization
+Appliance (OVA) using VirtualBox, running Ubuntu 14.04, server edition. We
+chose Ubuntu, because it comes with user namespaces enabled by default (see
+also \referToSection{sandboxing:namespaces:user}). The OVA is intended to
 demonstrate some of the techniques discussed above.
 
 % We've created a couple mirrors for the distribution of the OVA:
@@ -71,8 +81,88 @@ $ ssh -p 2222 onlineta@127.0.0.1
 If not, you may need to set up port forwarding in your OVA client. In the case
 above, we forward host port 2222 to guest port 22.
 
-\section{Memory limits}
+\textbf{Remark}: For simplicity, we've disabled swap.
 
-For simplicity, we've disabled swap.
+\section{Monitoring and Limits}
+
+Under \texttt{/home/onlineta/jail} you will find the sandboxing programs
+discussed in \referToSection{assessment-engine:sandboxes-and-chaining}, as well
+as the \texttt{monitor} program discussed in
+\referToSection{assessment-engine:monitoring-and-limits}.
+
+Although we've implemented a farily sophisticated sandbox, we have not made use
+of the following concepts:
+
+\begin{itemize}
+
+\item User namespaces.
+
+\item Capabilities.
+
+\item Seccomp.
+
+\item Disabling block device access.
+
+\item Detaching rather than unmounting the root file system (see also
+\referToSection{assessment-engine:root-file-system}).
+
+\end{itemize}
+
+Notably, the \texttt{monitor} program also has to be run with \texttt{sudo} as
+it needs to perform mounting operations --- something that, to our knowledge,
+requires root privileges on the host.
+
+\subsection{The Observer Effect}
+
+Our \texttt{monitor} program provides for a couple options for monitoring and
+limits. We've noticed that applying a timeout, or using SquashFS has
+considerable effects on our monitoring results. We present these results below
+together with an execution of \texttt{monitor} using bind mounts and no timeout
+(we pressed a key after some time).
+
+\begin{lstlisting}
+$ sudo ./monitor /home/student/stall
+Press any key to stop stalling..
+Wall-clock time (seconds): 8.29
+Max memory use (bytes): 221184
+Total CPU time (nanoseconds): 3019991
+Total CPU time in user mode (USER_HZ): 0
+Total CPU time in kernel mode (USER_HZ): 0
+\end{lstlisting}
+
+\begin{lstlisting}
+$ sudo ./monitor -s /home/student/stall
+Press any key to stop stalling..
+Wall-clock time (seconds): 4.50
+Max memory use (bytes): 3100672
+Total CPU time (nanoseconds): 13034532
+Total CPU time in user mode (USER_HZ): 0
+Total CPU time in kernel mode (USER_HZ): 1
+\end{lstlisting}
+
+\begin{lstlisting}
+sudo ./monitor -w 5 /home/student/stall
+Press any key to stop stalling..
+Wall-clock time (seconds): timeout
+Max memory use (bytes): 180224
+Total CPU time (nanoseconds): 4942463093
+Total CPU time in user mode (USER_HZ): 161
+Total CPU time in kernel mode (USER_HZ): 335
+\end{lstlisting}
+
+So using SquashFS here yields a 15x increase in memory use ise and 4x increase
+in CPU time, i.e. the lowest limit on memory we can set on memory is about 24
+megabytes. Using a timeout there yields over 1600x increase in CPU time. This
+yields timeouts unusable together with limits on the CPU time.
+
+This is unfortunate, as we would have liked more fine grained control of how
+much memory, CPU time, and wall-clock time students may use. At the same time,
+dropping a timeout limit allows student programs to stall.  Using bind mounts
+ahead of SquashFS disallows from disabling access to block devices in general.
+We may be able to solve the latter problem using an approach similar to our I/O
+file system, but we have not had time to look into this.
+
+Recall that we already showed that we safely catch fork bombs in
+\referToSection{assessment-engine:monitoring-and-limits}.
 
 \input{discussion/future-work}

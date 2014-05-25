@@ -2,6 +2,8 @@
 
 \section{Sandboxes and Chaining}
 
+\label{section:assessment-engine:sandboxes-and-chaining}
+
 We follow the Unix philosophy\cite{salus-1994} in our sandboxing approach, i.e.
 we write programs that do one thing and (eventually) do it well. More
 sophisticated sandboxes are achieved by chaining together simple sandboxing
@@ -60,11 +62,11 @@ maximum number of processes to 20, and the maximum CPU time to 1 second.
 
 We can chain these together to form sophisticated sandboxes. For instance, let
 \texttt{rootfs} be a subfolder in the current working directory, containing an
-executable \texttt{rootfs/home/student/program} (more on the necessity of
+executable \texttt{rootfs/home/student/forkbomb} (more on the necessity of
 \texttt{sudo} later):
 
 \begin{lstlisting}
-$ sudo ./minpuf ./mount-rootfs ./pivot-root /home/student/program
+$ sudo ./pumin ./sh-rootfs-bind ./pivot-root /home/student/forkbomb
 \end{lstlisting}
 
 The keen reader might notice that e.g. \texttt{setuid} and \texttt{pivot-root}
