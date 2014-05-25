@@ -15,7 +15,7 @@ setup_rootfs()
     exit(EXIT_FAILURE);
   }
 
-  if (mount("root", "rootfs-target", "bind",
+  if (mount("rootfs", "rootfs-target", "bind",
     MS_BIND | MS_SLAVE | MS_RDONLY, NULL))
   {
     perror("mount rootfs-target");
