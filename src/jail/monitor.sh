@@ -29,7 +29,7 @@ done
 # Setup #
 #########
 
-./setup-cgroups.sh
+./setup-cgroups.sh || exit 1
 
 # Some useful variables.
 CGROUPS_DIR="cgroups-target"
@@ -48,7 +48,7 @@ TIME_FILE=$(mktemp "tmp.onlineta.XXXXXXXXXXXX")
 # Run #
 #######
 
-$LIMIT_WALL_CLOCK time -p --output="$TIME_FILE" ./priv-test.sh $LIMIT_CPU_TIME
+$LIMIT_WALL_CLOCK time -p --output="$TIME_FILE" ./priv-test.sh $LIMIT_CPU_TIME || exit 1
 
 ##########
 # Report #
@@ -80,4 +80,4 @@ echo "Total CPU time in kernel mode (USER_HZ): $CPUACCT__STAT_KERNEL"
 
 rm "$TIME_FILE"
 
-./teardown-cgroups.sh
+./teardown-cgroups.sh || exit 1
