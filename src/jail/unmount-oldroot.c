@@ -6,7 +6,6 @@
 #include <errno.h> // errno, EBUSY
 #include <string.h> // strncmp
 #include <unistd.h> // execv
-#include <sys/resource.h> // *rlimit*
 
 static int
 mount_proc()
@@ -79,38 +78,6 @@ unmount_proc()
   return 0;
 }
 
-static int
-limit_resources()
-{
-  struct rlimit rlimit;
-
-  rlimit.rlim_cur = 20;
-  rlimit.rlim_max = 20;
-  if (setrlimit(RLIMIT_NPROC, &rlimit))
-  {
-    perror("limit nproc");
-    exit(EXIT_FAILURE);
-  }
-
-  rlimit.rlim_cur = 0;
-  rlimit.rlim_max = 0;
-  if (setrlimit(RLIMIT_CORE, &rlimit))
-  {
-    perror("limit core size");
-    exit(EXIT_FAILURE);
-  }
-
-  rlimit.rlim_cur = 1;
-  rlimit.rlim_max = 1;
-  if (setrlimit(RLIMIT_CPU, &rlimit))
-  {
-    perror("limit cpu time");
-    exit(EXIT_FAILURE);
-  }
-
-  return 0;
-}
-
 int
 main(int argc, char *argv[])
 {
@@ -120,15 +87,7 @@ main(int argc, char *argv[])
   unmount_oldroot();
   unmount_proc();
 
-  setuid(1000);
-
-  limit_resources();
-
-  if (execv(argv[1], argv + 1))
-  {
-    perror("exec under new root");
-    exit(EXIT_FAILURE);
-  }
-
-  exit(EXIT_SUCCESS);
+  execv(argv[1], argv + 1);
+  perror("execv after unmount-oldroot");
+  exit(EXIT_FAILURE);
 }

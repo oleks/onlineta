@@ -1,6 +1,9 @@
 #include <stdio.h>
+#include <unistd.h>
 
 int main()
 {
-  printf("HEJ!\n");
+  int x;
+  printf("HEJ %d!\n", getuid());
+  scanf("%d\n", &x);
 }

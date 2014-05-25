@@ -6,19 +6,89 @@
 #include <unistd.h> // clone
 #include <sched.h> // CLONE_*
 
-static int
-exec(void *arg)
-{
-  char **argv = (char **)arg;
-  execv(argv[0], argv);
-  perror("exec");
-  exit(EXIT_FAILURE);
-}
+#include <fcntl.h> // O_*
+#include <semaphore.h> // sem_*
 
 #define STACK_SIZE (1024 * 1024)
 
 static char
 stack[STACK_SIZE];
+
+static sem_t *
+MAPPING;
+
+static int
+chdir_to_uid_map(pid_t pid)
+{
+  #define BUF_SIZE 32
+
+  char pid_str[BUF_SIZE];
+
+  if (chdir("/proc"))
+  {
+    perror("Couldn't navigate to /proc");
+    exit(EXIT_FAILURE);
+  }
+
+  if (snprintf(pid_str, BUF_SIZE, "%d", pid) < 1)
+  {
+    perror("pid to string");
+    exit(EXIT_FAILURE);
+  }
+
+  if (chdir(pid_str))
+  {
+    perror("Couldn't navigate to /proc/[pid]");
+    exit(EXIT_FAILURE);
+  }
+
+  return 0;
+
+  #undef BUF_SIZE
+}
+
+static int
+uid_map()
+{
+  FILE *uid_map_file;
+
+  uid_map_file = fopen("uid_map", "ae"); // O_APPEND and O_CLOEXEC
+
+  if (!uid_map_file)
+  {
+    perror("Couldn't open uid_map file");
+    exit(EXIT_FAILURE);
+  }
+
+  if (fprintf(uid_map_file, "0 %d 1", getuid()) < 1)
+  {
+    perror("Couldn't map the contained user to root");
+    exit(EXIT_FAILURE);
+  }
+ 
+  if (fclose(uid_map_file))
+  {
+    perror("Couldn't close the uid_map file");
+    exit(EXIT_FAILURE);
+  }
+
+  return 0;
+}
+
+static int
+exec(void *arg)
+{
+  arg = arg;
+  char **argv = (char **)arg;
+
+  // Wait for the mapping to finish.
+  sem_wait(MAPPING);
+  sem_close(MAPPING);
+
+  execv(argv[0], argv);
+  perror("exec");
+  exit(EXIT_FAILURE);
+}
 
 int
 main(int argc, char  *argv[])
@@ -27,6 +97,13 @@ main(int argc, char  *argv[])
 
   argc = argc;
 
+  MAPPING = sem_open("/MAPPING", O_CREAT, 0644, 0);
+  if (MAPPING == SEM_FAILED)
+  {
+    perror("Open process-shared semaphore for userns");
+    exit(EXIT_FAILURE);
+  }
+
   pid = clone(exec, stack + STACK_SIZE, CLONE_NEWUSER | SIGCHLD, argv + 1);
 
   if (pid == -1)
@@ -34,6 +111,11 @@ main(int argc, char  *argv[])
     perror("new userns");
     exit(EXIT_FAILURE);
   }
+
+  chdir_to_uid_map(pid);
+  uid_map();
+  sem_post(MAPPING);
+  sem_close(MAPPING);
 
   if (waitpid(pid, NULL, 0) == -1)
   {
