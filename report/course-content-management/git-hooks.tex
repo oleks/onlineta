@@ -1,0 +1,17 @@
+% vim: set spell:
+
+\section{Git Hooks}
+
+Git hooks is a Git mechanism for executing custom scripts when important events
+happen for Git repository\cite{man-5-githooks}. The scripts can control in how
+far certain Git operations should succeed. A Git hook is an adequately named
+executable placed in a special subdirectory in a local Git repository. Git
+hooks are not part of the version-controlled code base of a repository.
+
+For instance, the \texttt{update} hook is executed whenever the client attempts
+to push something to a branch. The client has already been authenticated, but
+no changes have yet been made. The hook is passed adequate arguments to
+identify the branch or tag being updated and the update taking place. If this
+hook exits with a non-zero exit value, the update will duly fail.
+
+Other Git hooks are discussed in subsequent sections.

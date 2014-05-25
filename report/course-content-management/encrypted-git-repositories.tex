@@ -3,41 +3,37 @@
 \section{Encrypted and Signed Git Repositories}
 
 Git comes with a built-in a method to digitally sign tags (versions) and
-commits. The intent is to allow us to ensure that particular tags (versions) or
-commits come from particular individuals\cite{gerwitz-2013}.
+commits. The intent is to allow us to ensure that particular tags or commits
+come from particular individuals\cite{gerwitz-2013}.
 
 We could use this to ensure that a particular submission indeed comes from a
 particular student, but we cannot expect the students to be proficient enough
-in Git to use tags and signed commits. Instead, we consider Git repositories
+in Git to use signed tags or commits. Instead, we consider Git repositories
 where commits are always, seamlessly signed.
 
 At the core of Git is a key-value store\cite{chacon-2009}. All
-version-controlled data, is retained in so-called ``Git objects'', addressed by
-the SHA-1 hash of their contents. We ``commit'' data to, and ``checkout'' data
+version-controlled data, is retained in so-called Git objects, addressed by the
+SHA-1 hash of their contents. We say that commit data to, and checkout data
 from this data store.
 
-Git retains diffs of files (compared to their earlier versions), rather than
-files themselves. A file in a local Git repository is therefore saved twice,
-once as a regular file on the file system, and once as a sequence of diffs,
-retained as Git objects. When performing a Git push operation to a remote Git
-repository, only Git objects are ever sent along.
+Git retains diffs of data (compared to its earlier versions), rather than the
+data itself. Data in a local Git repository is therefore saved twice, once on
+the regular file system, and once as a sequence of diffs, retained as Git
+objects. When performing a Git push operation to a remote Git repository, only
+Git objects are ever sent along.
 
 The \texttt{filter} Git attribute \cite{man-5-gitattributes} allows us to
-filter the data before it is committed to, and filter it when it is checked out
-of the data store. This is achieved by two commands, ``smudge'' and ``clean'',
-respectively. The names imply that the intended use is to retain only ``clean''
-data in the data store.
+filter the data before it is committed to, or when it is checked out of the
+data store. This is achieved by two commands: \texttt{smudge} and
+\texttt{clean}, respectively. The names suggest that the intended use filters
+is to retain only ``clean'' data in the data store.
 
 We can abuse the system a bit, taking inspiration from its own
 documentation\cite{man-5-gitattributes}. We sign the data on commit and verify
-the signature upon checkout. To do this, we append the signature to the data on
-commit, and parse out the signature on checkout. We can also specify that a
-filter is required, i.e.  must exit with a zero exit code, for a commit or
-checkout to succeed. This way, we can fail if we can't verify the signature.
-
-Similarly, we can encrypt the data that goes into the data store, and decrypt
-the data when it leaves the data store. This way, we can make sure that student
-data stays safe, even if Git objects are ever leaked from our Git server.
+the signature on checkout. Similarly, we can encrypt the data that goes into
+the data store, and decrypt the data when it leaves the data store. This way,
+student data stays private, even if their personal Git objects leak from the
+Git server.
 
 \subsection{Keys}
 
@@ -75,13 +71,24 @@ their own in a way similar to Github. We have not had time to look into this.
 
 \subsection{Collaboration}
 
-It is easy enough to encrypt the data for one user, but this defeats many of
-the useful collaboration features of Git.
+It is easy enough to sign and encrypt the data for one user, but this defeats
+many of the useful collaboration features of Git. Besides, we must let the
+staff and the assessment engine see the student data as well.
 
 One way in which we can provide for collaborative, encrypted Git repositories
 is to encrypt the data for multiple recipients. This is straight-forward using
-GPG tools\cite{man-1-gpg2}. The pitfall of this is that new collaborators
-cannot see the work done before they joined the project, unless we resort to
-rewriting history.
+the OpenPGP suite of tools\cite{man-1-gpg2}. For an implementation of this, see
+the attached \texttt{./src/git-init.sh}.
 
-For an implementation of this, see the attached \texttt{./src/git-init.sh}.
+The pitfall of this approach in general is that new individuals cannot easily
+join as collaborators as the entire history has not been encrypted for them to
+see.  This is not a problem if we do not let students collaborate on
+submissions, but again, this defeats many of the useful collaboration features
+of Git.
+
+% students can collaborate on a branch different than their submission branch,
+% but then they can't use our Git server as a remote data store.
+
+Another limiting factor to student collaboration is our choice of having
+students submit to individual branches. One way to let students collaborate, is
+to have them be allocated a group branch by the staff.

@@ -4,23 +4,41 @@
 
 \label{section:discussion}
 
-We've sketched some aspects of a system that may serve as a framework for
-performing automated assessment of practical work in computer programming
-courses. We've discussed many technologies that we can use both to provide
-sandboxed execution environments, as well as a safe and secure course
-management system. The techniques discussed provide for lightweight system,
-capable of guaranteeing a high level of safety, security and fairness in
-performing assessments and managing course data.
+\begin{quotation}
 
-Unfortunately, due to time constraints, the techniques described have only been
-tried out in a scratchbook fashion. They have not been all compiled into a
-system that is ready for demonstration at the time of writing.
+\footnotesize\sffamily\itshape
 
-% For the purposes of discussion, we've created an Open Virtualization Appliance
-% (OVA) using VirtualBox, running Ubuntu 14.04, the server edition. We chose
-% Ubuntu, because it comes with user namespaces enabled by default (see also
-% \referToSection{sandboxing:namespaces:user}). The OVA is intended to
-% demonstrate some of the techniques discussed above.
+\begin{flushright}
+
+Some of the more obscure uses of \texttt{pivot\_root()} may quickly lead to insanity.
+
+\smallbreak
+
+\upshape
+
+--- \texttt{pivot\_root(2)} (2012)
+
+\end{flushright}
+
+\end{quotation}
+
+% We've sketched some aspects of a system that may serve as a framework for
+% performing automated assessment of practical work in computer programming
+% courses. We've discussed many technologies that we can use both to provide
+% sandboxed execution environments, as well as a safe and secure course
+% management system. The techniques discussed provide for lightweight system,
+% capable of guaranteeing a high level of safety, security and fairness in
+% performing assessments and managing course data.
+
+% Unfortunately, due to time constraints, the techniques described have only
+% been tried out in a scratchbook fashion. They have not been all compiled into
+% a system that is ready for demonstration at the time of writing.
+
+For the purposes of discussion, we've created an Open Virtualization Appliance
+(OVA) using VirtualBox, running Ubuntu 14.04, the server edition. We chose
+Ubuntu, because it comes with user namespaces enabled by default (see also
+\referToSection{sandboxing:namespaces:user}). The OVA is intended to
+demonstrate some of the techniques discussed above.
 
 % We've created a couple mirrors for the distribution of the OVA:
 
@@ -32,25 +50,25 @@ system that is ready for demonstration at the time of writing.
 
 % The SHA-512 sum of the OVA file is: TODO.
 
-% We'll be using 4 system users: \texttt{onlineta} --- the system administrator,
-% \texttt{git} --- the Git user, and \texttt{mikkel} and \texttt{niels} ---
-% students. For each user, their login password, OpenSSH, and GnuPG password is
-% their username.
+We'll be using 4 system users: \texttt{onlineta} --- the system administrator,
+\texttt{git} --- the Git user, and \texttt{kristian}, \texttt{louise}, and
+\texttt{mikkel} --- students. For each user, their login password, OpenSSH, and
+GnuPG password is their username.
 
-% We'll abuse the system administrator account for the tasks of the teaching
-% staff, and the Git user for running assessments. Ideally, each of these would
-% have their own dedicated users. In a real setting, students would not need to
-% have users on the system either. We do this for the purposes of a simple
-% demonstration.
+We'll abuse the system administrator account for the tasks of the teaching
+staff, and the Git user for running assessments. Ideally, each of these would
+have their own dedicated users. In a real setting, students would not need to
+have users on the system either. We do this for the purposes of a simple
+demonstration.
 
-% You should be able to log into the OVA using SSH, once booted on your host.
-% For instance,
+You should be able to log into the OVA using SSH, once booted on your host.
+For instance,
 
-% \begin{lstlisting}
-% $ ssh -p 2222 onlineta@127.0.0.1
-% \end{lstlisting}
+\begin{lstlisting}
+$ ssh -p 2222 onlineta@127.0.0.1
+\end{lstlisting}
 
-% If not, you may need to set up port forwarding in your OVA client. In the case
-% above, we forward host port 2222 to guest port 22.
+If not, you may need to set up port forwarding in your OVA client. In the case
+above, we forward host port 2222 to guest port 22.
 
 \input{discussion/future-work}

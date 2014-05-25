@@ -1,0 +1,111 @@
+% vim: set spell:
+
+\section{Discussion}
+
+\subsection{Pull requests}
+
+Our model of a student submission being a Git push to a student branch is not
+an accurate model of modern software development. Often, a developer would work
+on their own branch (as our students would), and then make a ``pull request''
+to merge their changes into the master branch\footnote{Alternatively, a
+developer might work on in their own repository, and then make a pull request
+for their changes to be merged into the main project
+repository\cite{bird-et-al-2009}.}.
+
+Such pull requests make little sense in education where all students are
+working on the same problem --- a scenario you'd often go to great lengths to
+avoid in industry. Instead, students are always allowed to submit what they
+have to their own branch. Code reviews are then done of snapshots of the
+student branch.
+
+Alternatively, we could have chosen to have students make a pull request to a
+special ``submission branch'', with the other branch being a ``draft branch''.
+(This would demand a more complicated access control layer.) The pull request
+could then be accepted if the code passed automatic code review.
+
+Unfortunately, it is sometimes instructional to give credit for an attempt at
+solving the problem. There may even come a situation where the student has made
+it to submit some basic working code in the submission branch but has a more
+comprehensive (non-working) solution in their draft branch. In our model, the
+commit and assessment history of a branch is sufficient to reveal when the code
+had last worked.
+
+\subsection{Responding to students}
+
+Responding to students via a subdirectory in their private branch means that
+the students have to pull from their branch before they can make a subsequent
+submission (the race condition aside). This is good because it encourages
+students to read feedback and not to push in the blind. This is bad because it
+might inhibit quick (re)submissions (made within minutes): as practice shows,
+this is frequent close to a deadline.
+
+An alternative could be to distribute feedback in a separate private student
+branch, which is not writable by students. This is easy to set up in gitolite,
+but is more permissive of students pushing in the blind, ignoring all feedback.
+It also adds to the complexity of the student's view of the system: some
+students may fail to realise that feedback is being given at all.
+
+As another alternative, feedback could be provided interactively, as part of a
+Git push operation. For instance, in a \texttt{post-receive} or a
+\texttt{post-update} Git hook. These hooks lets us run custom scripts after the
+real work of a Git push is done. The benefit is that the connection to the
+client is not closed until these scripts end, and standard output and error are
+redirected to the client\cite{man-5-githooks}. Although this allows to present
+the test results immediately, it is unclear where the test results should be
+persisted.
+
+\subsection{SSH Certificate Authority}
+
+\label{section:gitolite-ssh-certificate-authority}
+
+Our choice of gitolite as the access control layer for our Git server,
+seemingly prohibits the use of an SSH certificate authority.
+
+An SSH certificate authority is a separate server that certifies client public
+keys.  This relinquishes a Git server of the need to keep public keys in an
+authorized keys file, and allows to keep a centralized (hiearchical) registry
+of client keys. Gitolite relies on the use of an authorized keys file.
+
+Certificate authorities however, still have to forward client certificates to
+the Git server. If forwarded on-demand, the certificate authority is a single
+point of failure. If forwarded on occasion, certificate authorities are
+functionally equivalent to using a Git repository over SSH, as with gitolite.
+We therefore do not find this to be an inconvenience.
+
+\subsection{Scalability}
+
+\label{section:git-server-scalability}
+
+We dedicate a Git branch to every student. To our knowledge, there is no
+practical limit on the number of branches in a Git repository. If there is a
+limit, it has to do with underlying file system limits, as every branch
+requires a separate file in a particular subdirectory. This limit should be in
+the manner of millions, and so not applicable in a course, or department
+context.
+
+Each time a client performs a Git operation, a connection to the Git server is
+established. The server performs one of a limited set of (presumably, finite)
+operations in a separate user session.
+
+To our knowledge, there are no practical limits on the number of simultaneous
+connections to a Linux server. The number of user sessions however, is bound by
+the maximum number of processes per user. This limit can be found using:
+
+\begin{lstlisting}
+$ ulimit -u
+\end{lstlisting}
+
+Although this limit can be lifted, there is a more fundamental limit on the
+total number of processes for a Linux system. This limit is typically 32768. It
+should be increased with caution, and only if there are sufficient system
+resources. The limit can be found using:
+
+\begin{lstlisting}
+$ cat /proc/sys/kernel/pid_max
+\end{lstlisting}
+
+A dedicated Git server should safely scale to a course, or a department,
+provided sufficient memory, CPU, and disk resources and speeds. On a university
+scale, it is advisable to use a Git server per department. OpenSSH operations
+are fairly CPU intensive, and many simultaneous submissions may lead us to hit
+the process number limits.

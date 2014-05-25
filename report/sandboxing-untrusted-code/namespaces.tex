@@ -34,6 +34,8 @@ child namespace. We also discuss some technical details in
 
 \subsection{mnt}
 
+\label{section:namespaces:mnt}
+
 The mount (MNT) namespace abstracts over the mount points of a system. This
 allows for processes in different namespaces to have different views of the
 file system. Within a container, we can unmount points that are perhaps needed
@@ -46,14 +48,22 @@ One particularly useful application of mount namespaces is pivoting the file
 system root to some other point in the file system using
 \cite{man-2-pivot-root}. Pivoting the root in a container does not affect the
 host, or other containers. At the same time, pivoting the root moves all the
-dependencies on the old root, to a new root within the container.
+dependencies on the old root, to the new root within the container.
 
-This allows us to subsequently unmount the old root, provided that the new root
-does not depend on this mount point. This can be achieved by having the new
-root mounted as a \texttt{tmpfs}, or perhaps a read-only \texttt{squashfs}.
-This hides the original root file system in a matter similar to
-\cite{man-2-chroot}, but makes reestablishing the old root slightly more
-cumbersome, since the old root has to be properly remounted first.
+This allows us to subsequently unmount the old root, provided that the old rot
+is not busy. The old root is busy if there are mounts to targets under the old
+root, the running process originates, or has files open under the old root.  By
+closing all open files, switching to a process originating from under the new
+root, and unmounting all mounts under the old root, we can get to unmount the
+old root.
+
+\cite{man-2-pivot-root} hides the original root file system in a matter similar
+to \cite{man-2-chroot}, but makes reestablishing the old root slightly more
+cumbersome, since the old root has to be properly remounted first. By mounting
+the new root in a \texttt{tmpfs}, or perhaps even \texttt{squashfs}, we can
+also deny access to all block devices using the devices control group subsystem
+(see also \referToSection{control-groups:devices}). This makes remounting the
+old root all the more cumbersome.
 
 \subsection{uts}
 
