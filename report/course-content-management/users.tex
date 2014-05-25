@@ -1,0 +1,13 @@
+% vim: set spell:
+
+\section{Users}
+
+When using a Git server with OpenSSH, clients must be mapped to users on the
+host. There are at least two options for the mapping: each client gets their
+own user, or all clients map to the same user.
+
+The first option has higher administration costs, but gives perhaps more
+fine-grained access control. The second option is generally more popular
+because of less cluttering of the UTS namespace. Additional tools, like
+gitolite, are instead used to provide a fine-grained access control layer. We
+have also chosen to go with this option. We name our user, \texttt{git}.

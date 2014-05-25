@@ -1,0 +1,78 @@
+% vim: set spell:
+
+\section{Attack Surface}
+
+In this section, we discuss some of the possible ways that an attacker can
+approach our Git server.  This is distinct from attempting to attack our
+sandboxed environments in that the Git server is not sandboxed in any relevant
+way. It serves as a general purpose data store and gateway between students and
+staff.
+
+\subsection{Login shell}
+
+It is often important with Git servers to disallow clients' shell requests.
+This is typically achieved by setting the user's login shell to something
+non-permissive, e.g. a \cite{man-1-git-shell}, and disabling login for that
+user in general.
+
+This set up is perhaps a bit superfluous, as gitolite disables interactive
+shell login via the authorized keys file. Never-the-less it is a good extra
+level of security, as the login shell of any user can only be modified by a
+privileged user, which the \texttt{git} user is not.
+
+\subsection{Session preparation dialog}
+
+When a client is authenticated with OpenSSH, but before a user session starts,
+the client and the host enter into a session preparation dialog.
+
+The client can request a pseudo-tty (e.g. interactive shell), forwarding X11
+connections (e.g. remote desktop), forwarding TCP connections (e.g. virtual
+private networking), or forwarding the authentication agent connection over the
+secure channel (e.g. using the secure connection to establish other secure
+connections).
+
+All these options open up the attack surface of our Git server. Fortunately,
+all of these session dialog options can be disabled for any key in the
+authorized keys file\cite{man-8-sshd}. By default, gitolite disables all of
+these options for all keys.
+
+\subsection{Forced push and rewriting history}\label{section:forced-push}
+
+Git has a, somewhat controversial\cite{torvalds-2007,hamano-2009,rego-2013},
+forced push feature. This bypasses the check that the remote ref being updated
+should be an ancestor of the local ref used to overwrite
+it\cite{man-1-git-push}. Meaning that the branch being updated should be the
+strict base of the update.
+
+Forced push is dangerous because it incautiously overwrites history and can
+thereby inhibit assessment or even modify student records.
+
+This is mitigated for by gitolite permissions. Students and staff are simply
+not allowed to perform a forced push, supporting the notion introduced in
+\referToSection{analysis:other-notions}, that course data is never deleted.
+This means that students cannot e.g. amend to a commit that they have already
+pushed to the server. The students are encouraged to use
+\cite{man-1-git-revert} instead.
+
+\subsection{Git, OpenSSH, and Perl}
+
+Despite its popularity, relatively few vulnerabilities have ever been found
+outside of the Git development team\cite{cvedetails-com-2014a}.
+
+The security of Git (out of the box) however, depends on the sensibility of the
+developers involved. Impersonification and private key leaks are not always
+well guarded against\cite{gerwitz-2013}, especially with the advent of modern
+Git hosting services\cite{homakov-2012,huang-2013,homakov-2014}. It is the
+purpose of our Git server to serve as a guard against impersonification.
+Private key leaks are to be guarded against by the students themselves. 
+
+OpenSSH has also had relatively few vulnerabilities discovered outside of the
+OpenSSH development team\cite{cvedetails-com-2014b}. However, the underlying
+OpenSSL has been a lot less fortunate\cite{cvedetails-com-2014c}.
+
+Perl has only been a bit less fortunate\cite{cvedetails-com-2014d}.
+
+The referenced material does not cover all of the underlying libraries of the
+software. However, all of the above are popular pieces of software on public
+facing web servers.  Their security therefore, is a matter of grave public
+concern.

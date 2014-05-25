@@ -1,0 +1,37 @@
+% vim: set spell:
+
+\section{OpenSSH}
+
+\label{section:openssh}
+
+OpenSSH is a free (as in free speech) version of the SSH connectivity
+tools\cite{openssh-com-2014}.  The tools provide for secure encrypted
+communication between untrusted hosts over an insecure network\cite{man-1-ssh}.
+They include tools for user authentication, remote command execution, file
+management, etc.
+
+An OpenSSH host maintains a private/public key pair used to identify the host.
+Upon connection, the host offers its public key to the client, in hope that the
+client will accept it and (securely) proceed with authentication with the host.
+If authenticated, the client is mapped to a particular user on the host.  After
+some session preparation, the client, as that user, can start a session, i.e.
+request a shell or the execution of a command.
+
+One of the authentication methods supported by OpenSSH is using public key
+cryptography. The idea is that each client creates a private/public key pair,
+and informs the host of the public key over some otherwise secure channel, e.g.
+using a trusted keyserver.
+
+For any user on the host, a file can be created, e.g.
+\texttt{\textasciitilde/.ssh/authorized\_keys}, listing the public keys of
+those private/public key pairs that may be used to authenticate as that user.
+The format of this file\cite{man-8-sshd}, allows to specify additional options
+for each key. The options can be used to e.g. set a session-specific
+environment variable, or replace the command executed once the user is
+authenticated. The original command is then saved as the environment variable
+\texttt{SSH\_ORIGINAL\_COMMAND}.
+
+When using a Git server with OpenSSH, Git operations on the client, will
+attempt execute Git operations on the host. Per-key options can be used to make
+their execution dependent on the key used for authentication, e.g. performing
+authorisation.

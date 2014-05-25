@@ -1,0 +1,52 @@
+% vim: set spell:
+
+\section{Gitolite}
+
+Gitolite is an access control layer on top of Git\cite{gitolite-com-2014a}.
+Gitolite leverages the features of OpenSSH and Git hooks, as discussed above,
+to provide fine-grained authentication and
+authorisation\cite{gitolite-com-2014b}.
+
+Gitolite is used in multiple communities with high-stakes projects, such as
+Fedora, KDE, Gentoo, and kernel.org\cite{gitolite-com-2014c}. Among the reasons
+for choosing gitolite, kernel.org lists\cite{kernel-org-2014} ``well maintained
+and supported code base'', ``responsive development'', ``broad and diverse
+install base'', and ``had undergone an external code
+review''\cite{gitolite-google-group-2011}.
+
+There are also other tools out there, such as  Gerrit\footnote{See also
+\url{https://code.google.com/p/gerrit/}.} and Stash\footnote{See also
+\url{https://www.atlassian.com/software/stash}.}. Both of these provide a lot
+more than a simple access control layer.
+
+\subsection{Administration}
+
+Administration of the gitolite happens through a special Git repository on the
+Git server. There are three important elements to this repository:
+
+\begin{enumerate}
+
+\item The \texttt{./keys} subdirectory which contains the public keys of all
+users of the system, thereby defining the users. The names of the key files
+induce the users of the Git server\cite{gitolite-com-2014d}.
+
+\item The \texttt{./conf/gitolite.conf} configuration file. This file defines
+the repositories, and the users' permissions wrt. those repositories.
+
+\item The \texttt{post-update} Git hook on the server side, parsing the above
+keys subdirectory and config file, making adequate changes to the server
+repositories.
+
+\end{enumerate}
+
+It is important that access to this repository is safely guarded as it gives
+complete control over the users and repositories on the Git server.
+
+\subsection{Permissions}
+
+User permissions in gitolite can whitelisted for an entire repository, a
+branch, tag, or even a subfolder. Users may be granted, read, write,
+read-write, and even forced write permissions (more on this in the next
+section).  There are some even more fine-grained
+permissions\cite{gitolite-com-2014e}, but we will not be concerned with them
+here.
