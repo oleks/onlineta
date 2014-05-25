@@ -5,27 +5,62 @@ if [ $(id -u) != 0 ]; then
   exit 1
 fi
 
-./setup-cgroups.sh
+#############
+# Arguments #
+#############
 
-TIMEOUT=$1
+while getopts "w:m:t:" arg
+do
+  case $arg in
+  w)  LIMIT_WALL_CLOCK="$OPTARG";;
+  m)  LIMIT_MEMORY="$OPTARG";;
+  t)  LIMIT_CPU_TIME="$OPTARG";;
+  ?)  echo "Usage: ./monitor.sh"
+      echo "  [-w <timeout>]"
+      echo "  [-m <memlimit-in-bytes>]"
+      echo "  [-t <cpu-time-limit-in-seconds>]"
+      exit 1
+      ;;
+  esac
+done
+
+#########
+# Setup #
+#########
+
+./setup-cgroups.sh
 
 # Some useful variables.
 CGROUPS_DIR="cgroups-target"
 MEMCG="$CGROUPS_DIR/memory/onlineta"
 CPUACCT="$CGROUPS_DIR/cpu,cpuacct/onlineta"
 
+# Apply the memory limit, if specified.
+if [ -n "$LIMIT_MEMORY" ]; then
+  /bin/echo "$LIMIT_MEMORY" > "$MEMCG/memory.limit_in_bytes"
+fi
+
 # A file to save time data into.
 TIME_FILE=$(mktemp "tmp.onlineta.XXXXXXXXXXXX")
 
-# Run the test.
-# Timeout skews CPU time measurements.
-if [ -z "$TIMEOUT" ]; then
-  time -p --output="$TIME_FILE" ./priv-test.sh
-else
-  timeout "$TIMEOUT" time -p --output="$TIME_FILE" ./priv-test.sh
+#######
+# Run #
+#######
+
+# OBS! timeout(1) skews CPU time measurements.
+if [ -n "$LIMIT_WALL_CLOCK" ]; then
+  TIMEOUT="timeout ""$LIMIT_WALL_CLOCK"
 fi
 
-# Report
+if [ -n "$LIMIT_CPU_TIME" ]; then
+  CPUTIME=-t "$LIMIT_CPU_TIME"
+fi
+
+$TIMEOUT time -p --output="$TIME_FILE" ./priv-test.sh $CPUTIME
+
+##########
+# Report #
+##########
 
 TIME__WALL_CLOCK=$(cat "$TIME_FILE" | head -n 1 | cut -d ' ' -f 2)
 if [ -z "$TIME__WALL_CLOCK" ]; then
@@ -46,6 +81,10 @@ echo "Total CPU time in user mode (USER_HZ): $CPUACCT__STAT_USER"
 
 CPUACCT__STAT_KERNEL=$(echo "$CPUACCT__STAT" | tail -n 1 | cut -d ' ' -f 2)
 echo "Total CPU time in kernel mode (USER_HZ): $CPUACCT__STAT_KERNEL"
+
+############
+# Teardown #
+############
 
 rm "$TIME_FILE"
 
