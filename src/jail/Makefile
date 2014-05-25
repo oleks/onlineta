@@ -15,7 +15,7 @@ all:
 	$(CC) $(CFLAGS) $(LDFLAGS) -pthread -o user user.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -o mnt mnt.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -o minpuf minpuf.c
-	$(CC) $(CFLAGS) $(LDFLAGS) -o mount-root mount-root.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -o mount-newroot mount-newroot.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -o pivot-root pivot-root.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -o root/bin/.umount-oldroot umount-oldroot.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -o root/bin/.setuid setuid.c
