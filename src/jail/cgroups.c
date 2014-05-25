@@ -14,7 +14,7 @@ attach_to_cgroup(char *tasks_file_path)
 {
   FILE *tasks_file;
 
-  tasks_file = fopen(tasks_file_path, "ae");
+  tasks_file = fopen(tasks_file_path, "ae"); // O_APPEND and O_CLOEXEC
   if (!tasks_file)
   {
     perror("Couldn't open cgroup tasks file");
