@@ -1,2 +1,2 @@
 make
-sudo ./monitor -h
+./monitor -h
