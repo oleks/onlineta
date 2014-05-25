@@ -1,0 +1,23 @@
+#!/usr/bin/env sh
+
+TMPFS_TARGET="tmpfs-target"
+ROOTFS_TMPFS_TARGET="rootfs/home/student"
+INPUT="input"
+OUTPUT="output"
+SIZE=1M
+
+mount -t tmpfs -o size=$SIZE tmpfs "$TMPFS_TARGET" || exit 1
+cp -r "$INPUT/"* "$TMPFS_TARGET/" || exit 1
+
+mount --bind "$TMPFS_TARGET" "$ROOTFS_TMPFS_TARGET" || exit 1
+
+mount
+
+ls "$ROOTFS_TMPFS_TARGET"
+
+$@
+
+umount "$ROOTFS_TMPFS_TARGET" || exit 1
+
+cp -r "$TMPFS_TARGET/"* "$OUTPUT/" || exit 1
+umount "$TMPFS_TARGET" || exit 1
