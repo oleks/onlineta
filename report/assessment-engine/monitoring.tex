@@ -1,0 +1,46 @@
+% vim: set spell:
+
+\section{Monitoring and Limits}
+
+In general, we would like to monitor the execution of our programs. For
+instance, we may monitor a reference solution to an assignment, so as to arrive
+at sound limits on submissions for that assignment. Monitoring a submission may
+also give some useful information wrt. feedback.
+
+We introduce the program \texttt{monitor} performing monitoring and imposing
+limits. The program uses a sophisticated sandbox (see above) to impose many
+general limits, and allows optionally for a limit wall-clock time, CPU time,
+and memory.  The program also has the option of using either a bind-mounted or
+a SquashFS root file system.
+
+\begin{lstlisting}
+$ sudo ./monitor -h
+Usage: ./monitor
+  [-w <timeout>]
+  [-m <memlimit-in-bytes>]
+  [-t <cpu-time-limit-in-seconds>]
+  [-s] (use squashfs for the rootfs)
+  <executable-on-rootfs>
+\end{lstlisting}
+
+For instance, let's try monitoring a forkbomb that prints a \texttt{.} for
+every process it gets to spawn:
+
+\begin{lstlisting}
+$ sudo ./monitor /home/student/forkbomb
+...............Wall-clock time (seconds): 0.04
+Max memory use (bytes): 524288
+Total CPU time (nanoseconds): 3493968
+Total CPU time in user mode (USER_HZ): 0
+Total CPU time in kernel mode (USER_HZ): 0
+\end{lstlisting}
+
+These results come from putting the program into a memory, and cpuacct
+namespace, as well as making the \cite{man-1-time} Linux user space program
+part of our program chain.
+
+You can experiment with this on the referenced virtual machine, or browse the
+code under the attached \texttt{./src/jail/monitor}. The results of applying
+various optional limits are also discussed in \referToSection{discussion}. In
+the following sections we discuss some of the more interesting aspects of our
+sandboxes and monitoring.

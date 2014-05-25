@@ -1,0 +1,76 @@
+% vim: set spell:
+
+\section{Sandboxes and Chaining}
+
+We follow the Unix philosophy\cite{salus-1994} in our sandboxing approach, i.e.
+we write programs that do one thing and (eventually) do it well. More
+sophisticated sandboxes are achieved by chaining together simple sandboxing
+programs. A simple sandboxing program puts itself into a simple sandbox and
+executes (or forks and executes) the next program on its argument list.
+
+This keeps the individual sandboxing quirks to the individual programs, and
+allows for an easy composition of sandboxes into sophisticated sandboxed
+environments. Unlike LXC, and other tools we've seen, it also gives us full
+control of the order in which a sandbox is constructed.
+
+Some of our simple sandboxing programs are summarised below:
+
+\begin{description}[\setleftmargin{0.2in}\breaklabel\setlabelstyle{\tt}]
+
+\item [cgroups] Attach the process to a set of cgroups. The cgroup
+\texttt{tasks} files (where to append the pid) are passed as options to the
+program.
+
+\item [mnt] Enter a new mount namespace.
+
+\item [user] Enter a new user namespace. The current user is mapped to uid 0
+within the container.
+
+\item [pumin] Enter a new (p)id, (u)ts, (m)ount, (i)pc, and (n)et namespace.
+
+\item [sh-rootfs-bind] Bind-mount a root file system. By default, the subfolder
+\texttt{rootfs} is assumed to contain the new root file system, and
+\texttt{rootfs-target} is assumed to be the target for the mount.
+
+\item [sh-rootfs-squashfs] Similar to \texttt{sh-rootfs-bind}, but mounts a
+root file system as a SquashFS. By default, assumes that the SquashFS file is
+located at \texttt{squashfs}.
+
+\item [sh-iofs] Mounts a tmpfs for use for file-system-based input to and
+output from a container. By default, assumes that the input should be copied
+from \texttt{input}, and the output should be copied to \texttt{output} (after
+deleting all other files). Also, assumes that the tmpfs target is
+\texttt{tmpfs-target}, and under the new root,
+\texttt{rootfs-target/home/student}. Should only be called after the new rootfs
+has been mounted.
+
+\item [pivot-root] Pivot the root file system. By default, it is assumed that
+the new root is under \texttt{root}, and the old root can be placed under
+\texttt{rootfs/.oldroot}.
+
+\item [umount-oldroot] Unmount the old root file system. By default, assumed to
+be under \texttt{/.oldroot}.
+
+\item [setuid] Set the user id. By default, to 1000.
+
+\item [rlimits] Set resource limits. By default, set core file size to 0, the
+maximum number of processes to 20, and the maximum CPU time to 1 second.
+
+\end{description}
+
+We can chain these together to form sophisticated sandboxes. For instance, let
+\texttt{rootfs} be a subfolder in the current working directory, containing an
+executable \texttt{rootfs/home/student/program} (more on the necessity of
+\texttt{sudo} later):
+
+\begin{lstlisting}
+$ sudo ./minpuf ./mount-rootfs ./pivot-root /home/student/program
+\end{lstlisting}
+
+The keen reader might notice that e.g. \texttt{setuid} and \texttt{pivot-root}
+already have Linux user space equivalents. We reimplement these to fit our
+chaining approach. We leave it to future work to not reimplement existing
+simple sandboxing programs, or patch these programs to suit our needs.
+
+\textbf{Remark}: Under the current implementation, the default is typically the
+only option for the above programs.

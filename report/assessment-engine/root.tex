@@ -10,13 +10,33 @@
 
 \begin{flushright}
 
-/* War is peace. Verbosity is silence. MS\_VERBOSE is deprecated. */
+This is the Unix philosophy: Write programs that do one thing and do it well.
+Write programs to work together. Write programs to handle text streams, because
+that is a universal interface.
 
 \smallbreak
 
 \upshape
 
---- DAVID HOWELLS, Linux Source Code (2012)
+--- Doug Mcllroy (1994)
+
+\end{flushright}
+
+\end{quotation}
+
+\begin{quotation}
+
+\footnotesize\sffamily\itshape
+
+\begin{flushright}
+
+Some of the more obscure uses of \texttt{pivot\_root()} may quickly lead to insanity.
+
+\smallbreak
+
+\upshape
+
+--- \texttt{pivot\_root(2)} (2012)
 
 \end{flushright}
 
@@ -26,12 +46,11 @@ When a student makes a submission, it needs to be assessed. The
 assessment is specified by the teaching staff, and may consist of a range of
 static and dynamic analyses, as well as a feedback processing step.
 
-In general, we refer to these steps as the processes of an assessment. The
-processes of an assessment, each run their own sandbox and communicate with
-other processes using standard in/out, and perhaps an in-memory file system. 
-
-The combination of these sandboxed processes forms an assessment engine, taking
-the student submission in at one end, and producing ``student-friendly''
+In general, we refer to these steps as the \emph{processes} of an assessment.
+The processes of an assessment, each run their own sandbox and communicate with
+other processes using standard in/out, and perhaps an in-memory file system.
+The combination of these sandboxed processes forms an \emph{assessment engine},
+taking the student submission in at one end, and producing ``student-friendly''
 feedback at the other.
 
 The general approach to designing these processes is intended to be to monitor
@@ -39,68 +58,12 @@ a reference solution: which files, libraries does it need, how much memory and
 CPU time does it need, etc. This data is then used to create a conservative
 sandbox for running the processes of an assessment.
 
-\textbf{Remark}: Due to time constraints, I have not been able to complete this
-chapter. This chapter should be read as notes, rather than a fine-grained text.
+\input{assessment-engine/sandboxes-and-chaining}
 
-\section{Monitoring}
+\input{assessment-engine/monitoring}
 
-Control groups, as discussed in \referToSection{sandboxing:control-groups}, can
-be used to measure the memory, and CPU time of processes. \cite{man-1-time}
-user space utility can be used to measure wall-clock time.
+\input{assessment-engine/pivot-root}
 
-A bit more cumbersome is figuring out what files are needed in the root file
-system for a process to complete successfully. Some files are necessitated by
-the assignment itself. Sometimes, it will also suffice to execute statically
-linked programs. All this is easy enough.
+\input{assessment-engine/root-file-system}
 
-The complication comes for executables that make use of other programs for
-their execution (e.g. shell scripts) dynamically linked executables. We can
-figure out the files that are opened throughout the execution of a program
-using \texttt{strace(1)}.
-
-For a dynamically-linked ELF executable, we can inspect it using
-\texttt{mreadelf(1)}. Here, we are looking for interpreter it is requesting,
-which will dynamically link the relevant library. Next, we look for the shared
-libraries that it requests. Including the interpreter and the related shared
-libraries in the root file system is sufficient to run a dynamically linked
-executable within that root file system.
-
-\section{Sharing a file system between a host and a container}.
-
-One way to share data between the host and a Linux container is using a shared
-in-memory file system. We sketch the algorithm for this using the techniques we
-discussed in the previous chapter.
-
-\begin{enumerate}
-
-\item Mount a temporary in-memory file system under a target \texttt{./output},
-e.g. of maximum size 1 megabyte.
-
-\item Enter a new mount namespace.
-
-\item Make sure that original root marks all mount points as private.
-
-\item Mount the new root as a readonly in-memory slave under a target
-\texttt{./readonly}, e.g. using a \texttt{squashfs} file system type for extra
-``read-onlyness''.
-
-\item Bind mount \texttt{./output} under \texttt{./readonly/output}.
-
-\item Pivot root to the new root.
-
-\item Unmount all but the new root and the output directory.
-
-\item Drop privileges.
-
-\item Run the contained program. (Exit the mount namespace.)
-
-\item Clean up, and save the data in \texttt{./output}, if necessary.
-
-\end{enumerate}
-
-This way, the host provides a safe scratchspace for the container. Both the
-host and the container have read and write access to this scratchspace.  Yet,
-the container needs no access to any underlying block device. If the data a
-container produces should be retained, we do this in the last step.
-
-\input{assessment-engine/other-aspects}
+\input{assessment-engine/io-file-system}
