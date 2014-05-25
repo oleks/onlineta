@@ -9,10 +9,13 @@
 static int
 exec(void *arg)
 {
-  char **argv = (char **)arg;
-  execv(argv[0], argv);
-  perror("exec");
-  exit(EXIT_FAILURE);
+  arg = arg;
+//  char **argv = (char **)arg;
+  printf("%d\n", getuid());
+  return 0;
+  //execv(argv[0], argv);
+  //perror("exec");
+  //exit(EXIT_FAILURE);
 }
 
 #define STACK_SIZE (1024 * 1024)
