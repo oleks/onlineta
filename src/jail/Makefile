@@ -4,15 +4,19 @@ LDFLAGS=
 
 all:
 	mkdir -p "root/home/student"
+	mkdir -p "root/bin"
 	mkdir -p "root/.oldroot"
 	mkdir -p "rootfs-target"
 	mkdir -p "tmpfs-target"
 	mkdir -p "input"
 	mkdir -p "output"
 	$(CC) $(CFLAGS) $(LDFLAGS) -o input/hej hej.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -o cgroups cgroups.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -o userns userns.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -o mnt mnt.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -o minpuf minpuf.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -o rootfs rootfs.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -o pivot-root pivot-root.c
-	$(CC) $(CFLAGS) $(LDFLAGS) -o root/init init.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -o root/bin/.unmount-oldroot unmount-oldroot.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -o root/bin/.setuid setuid.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -o root/bin/.rlimits rlimits.c

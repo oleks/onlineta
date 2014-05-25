@@ -8,7 +8,18 @@ fi
 mount -t tmpfs -o size=1M tmpfs "tmpfs-target" || exit 1
 cp -r "input/"* "tmpfs-target/" || exit 1
 
-./mnt ./rootfs ./minpuf ./pivot-root /init /home/student/hej
+./mnt \
+  ./rootfs \
+  ./minpuf \
+  ./cgroups \
+    -g ./cgroups-target/memory/onlineta/tasks \
+    -g ./cgroups-target/cpu,cpuacct/onlineta/tasks \
+    -g ./cgroups-target/devices/onlineta/tasks \
+  ./pivot-root \
+  /bin/.unmount-oldroot \
+  /bin/.setuid \
+  /bin/.rlimits \
+  /home/student/hej
 
 rm -rf "output/"*
 cp -r "tmpfs-target/"* "output/"

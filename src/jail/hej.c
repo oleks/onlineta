@@ -3,5 +3,7 @@
 
 int main()
 {
+  int x;
   printf("HEJ %d!\n", getuid());
+  scanf("%d\n", &x);
 }
