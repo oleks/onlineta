@@ -50,18 +50,14 @@ chose Ubuntu, because it comes with user namespaces enabled by default (see
 also \referToSection{sandboxing:namespaces:user}). The OVA is intended to
 demonstrate some of the techniques discussed above.
 
-% We've created a couple mirrors for the distribution of the OVA:
-
-% \begin{itemize}
-
-% \item TODO
-
-% \end{itemize}
-
-% The SHA-512 sum of the OVA file is: TODO.
+The OVA file should be available from \url{http://goo.gl/fJlRhK}. The source
+code of interest is located under \texttt{/home/onlineta/onlineta/src}. The
+same source directory has also been archived and attached with the report under
+\texttt{src.tar.gz}.
 
 We'll just be using one of the users on the system \texttt{onlineta} -- the
-system administrator.
+system administrator. The password for the account and OpenSSH key are both
+\texttt{onlineta}. We do not demonstrate the git functionality here.
 
 You should be able to log into the OVA using SSH, once booted on your host.
 For instance,
@@ -73,7 +69,15 @@ $ ssh -p 2222 onlineta@127.0.0.1
 If not, you may need to set up port forwarding in your OVA client. In the case
 above, we forward host port 2222 to guest port 22.
 
-\textbf{Remark}: For simplicity, we've disabled swap.
+\textbf{Remark(s)}:
+
+\begin{itemize}
+
+\item For simplicity, we've disabled swap.
+
+\item We do not demonstrate the git functionality here.
+
+\end{itemize}
 
 \section{Monitoring and Limits}
 
