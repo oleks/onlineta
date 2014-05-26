@@ -1,0 +1,12 @@
+#!/usr/bin/env sh
+
+ROOTFS_TARGET="rootfs-target"
+SQUASHFS="squashfs"
+
+mount --make-rprivate / || exit 1
+mount -o ro -t squashfs  "$SQUASHFS" "$ROOTFS_TARGET" || exit 1
+mount --make-rslave "$ROOTFS_TARGET" || exit 1
+
+$@
+
+umount "$ROOTFS_TARGET" || exit 1

@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+
+ROOTFS="rootfs"
+ROOTFS_TARGET="rootfs-target"
+
+mount --make-rprivate / || exit 1
+mount --bind "$ROOTFS" "$ROOTFS_TARGET" || exit 1
+mount -o remount,ro "$ROOTFS_TARGET" || exit 1
+mount --make-rslave "$ROOTFS_TARGET" || exit 1
+
+$@
+
+umount "$ROOTFS_TARGET" || exit 1
