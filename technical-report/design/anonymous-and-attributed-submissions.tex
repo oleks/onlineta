@@ -1,0 +1,35 @@
+\section{Anonymous and Attributed Submissions}
+
+Starting off with mere support for anonymous submissions has numerous benefits:
+
+\begin{enumerate}
+
+\item The submission can be purged from the test server once the feedback is
+given. This means that OnlineTA does not have to offer secure long-term
+submission storage capabilities. Submission data is never at rest.
+
+\item We do not need to think about offering a student-friendly means of
+offering both attribution authentication and secure long-term storage of
+submissions.
+
+\item We can offer access to the service to the general public, which may be
+useful for the public relations of the project.
+
+\item An anonymous test server setup can be decorated with an attribution
+front-end, enabling a simple solution for attributed submissions. That is, the
+front-end is responsible for attribution verification, and then issues an
+anonymous test of the submission on the anonymous test server setup. It is the
+attribution server that then also makes sure to collect the feedback and offer
+secure long-term storage.
+
+\end{enumerate}
+
+Down-sides:
+
+\begin{enumerate}
+
+\item UNIX permissions cannot be easily employed, but can be offered from a uid
+pool, which we have to make sure to maintain throughout the lifecycle of a
+test.
+
+\end{enumerate}

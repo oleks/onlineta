@@ -1,0 +1,61 @@
+\documentclass[a4paper,oneside]{book}
+
+\PassOptionsToPackage{backref=page}{hyperref} % backrefs in references
+
+\usepackage[fancy]{template}
+\usepackage{survival-pack}
+
+\usepackage{makeidx} % index
+\makeindex % initialize index creation
+
+\renewcommand{\thefootnote}{(\arabic{footnote})}
+
+\backrefparscanfalse % don't automatically add backrefs to references
+
+% custom layout for backrefs in references
+\renewcommand*{\backrefalt}[4]{%
+  \ifcase #1 %
+    No citations.%
+  \or
+    Cited on page #2.%
+  \else
+    Cited on pages #2.%
+  \fi
+}
+
+\setup{%
+  subject={Technical Report},%
+  assignment={OnlineTA},%
+  date={July 12, 2015.}%
+}
+\setupLocation[short=DIKU]{Datalogisk institut, Copenhagen University}
+\setupAuthor[addendum={\email{oleks@oleks.info}}]{Oleksandr Shturmov}
+
+\DeclareDocumentCommand{\bib}{mmm}{%
+  \bibitem[#1]{#2}#3
+  \backrefprint
+}
+
+\DeclareDocumentCommand{\bibremark}{m}{%
+  \vspace{0.05in}\\
+  \emph{#1}
+}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{first} % no fancy header on first page (just a fancy footer).
+
+\tableofcontents
+
+\setcounter{chapter}{-1}
+
+\input{introduction/root}
+
+\input{design/root}
+
+\input{references}
+
+\printindex
+
+\end{document}
